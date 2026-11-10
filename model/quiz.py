@@ -22,3 +22,15 @@ class Quiz:
             bool: 정답이면 True, 아니면 False
         """
         return self.answer == user_answer
+
+    def to_dict(self) -> dict:
+        return {
+            "question": self.question,
+            "choices": self.choices,
+            "answer": self.answer,
+            "hint": self.hint,
+        }
+
+    @classmethod
+    def from_dict(cls, data) -> "Quiz":
+        return cls(**data)
