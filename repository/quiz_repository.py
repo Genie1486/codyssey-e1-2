@@ -13,16 +13,24 @@ class QuizRepository:
 
     # ===== 헬퍼 메서드 (중복 제거) =====
 
+    def _initialize_file(self) -> dict:
+        """파일 없을 때 초기 state.json 생성"""
+        initial_data = {"quizzes": [], "best_score": 0}
+        self._save_data(initial_data)
+        return initial_data
+
     def _load_data(self) -> dict:
         """파일에서 JSON 데이터 로드"""
         try:
             with open(self.file_path, "r", encoding="utf-8") as f:
                 return json.load(f)
         except FileNotFoundError as e:
+            self._initialize_file()
             raise QuizFileNotFoundError(
                 f"파일을 찾을 수 없습니다: {self.file_path}"
             ) from e
         except json.JSONDecodeError as e:
+            self._initialize_file()
             raise QuizFileCorruptedError(
                 f"JSON 파일이 손상되었습니다: {self.file_path}"
             ) from e
@@ -48,7 +56,7 @@ class QuizRepository:
     def get_quiz_by_id(self, quiz_id):
         """특정 퀴즈 조회"""
 
-    def create_quiz(self, quiz: Quiz) -> None:
+    def save_quiz(self, quiz: Quiz) -> None:
         """퀴즈 추가"""
         data = self._load_data()
         quizzes = data.get("quizzes", [])
@@ -58,7 +66,14 @@ class QuizRepository:
 
         self._save_data(data)
 
-    def remove_quiz(self, quiz_id):
+    def save_quizzes(self, quizzes: list[Quiz]) -> None:
+        """여러 퀴즈 일괄 저장"""
+        data = self._load_data()
+        quiz_dicts = [quiz.to_dict() for quiz in quizzes]
+        data["quizzes"] = quiz_dicts  # 기존 데이터 덮어쓰기
+        self._save_data(data)
+
+    def delete_quiz(self, quiz_id):
         """퀴즈 삭제"""
 
     # ===== BestScore 관련  =====
@@ -66,7 +81,7 @@ class QuizRepository:
         data = self._load_data()
         return data.get("best_score", 0)
 
-    def update_best_score(self, score: int) -> None:
+    def save_best_score(self, score: int) -> None:
         """최고점수 갱신"""
         data = self._load_data()
         data["best_score"] = score

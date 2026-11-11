@@ -5,7 +5,7 @@ class OutputView:
     TITLE = "🎯 나만의 퀴즈 게임 🎯"
 
     @classmethod
-    def print_menu(cls, menus: list[str]) -> None:
+    def display_menu(cls, menus: list[str]) -> None:
         print(MenuFormat.DIVIDER.value)
         print(f"{MenuFormat.PADDING.value}{cls.TITLE}")
         print(MenuFormat.DIVIDER.value)
@@ -14,5 +14,5 @@ class OutputView:
         print(MenuFormat.DIVIDER.value)
 
     @classmethod
-    def print_exit(cls):
+    def display_exit(cls):
         print("프로그램을 종료합니다.")

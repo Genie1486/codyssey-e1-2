@@ -108,7 +108,7 @@ class TestQuizRepositoryQuizCRUD(unittest.TestCase):
         with patch.object(
             self.repo, "_load_data", return_value=fake_data
         ), patch.object(self.repo, "_save_data") as mock_save:
-            self.repo.create_quiz(fake_quiz)
+            self.repo.save_quiz(fake_quiz)
 
         expected_data = {
             "quizzes": [
@@ -153,7 +153,7 @@ class TestQuizRepositoryBestScoreCRUD(unittest.TestCase):
         with patch.object(
             self.repo, "_load_data", return_value=fake_data
         ), patch.object(self.repo, "_save_data") as mock_save:
-            self.repo.update_best_score(300)
+            self.repo.save_best_score(300)
 
         expected_data = {"quizzes": [], "best_score": 300}
         mock_save.assert_called_once_with(expected_data)
