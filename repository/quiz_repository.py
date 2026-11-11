@@ -1,5 +1,5 @@
 import json
-from model.quiz import Quiz
+from model import Quiz, BestScore
 from exceptions.repository_exceptions import (
     QuizFileNotFoundError,
     QuizFileCorruptedError,
@@ -8,6 +8,10 @@ from exceptions.repository_exceptions import (
 
 
 class QuizRepository:
+    # 파일 손상 시 복구용 기본값
+    # total == 0은 "아직 풀지 않은 상태"를 의미
+    DEFAULT_BEST_SCORE = {"score": 0, "correct": 0, "total": 0}
+
     def __init__(self, file_path: str) -> None:  # 주입!
         self.file_path = file_path
 
@@ -15,7 +19,7 @@ class QuizRepository:
 
     def _initialize_file(self) -> dict:
         """파일 없을 때 초기 state.json 생성"""
-        initial_data = {"quizzes": [], "best_score": 0}
+        initial_data = {"quizzes": [], "best_score": self.DEFAULT_BEST_SCORE.copy()}
         self._save_data(initial_data)
         return initial_data
 
@@ -77,12 +81,26 @@ class QuizRepository:
         """퀴즈 삭제"""
 
     # ===== BestScore 관련  =====
-    def get_best_score(self) -> int:
-        data = self._load_data()
-        return data.get("best_score", 0)
+    def _is_valid_best_score(self, best_score: dict) -> bool:
+        """best_score 유효성 검증"""
+        required_keys = {"score", "correct", "total"}
+        return required_keys.issubset(best_score.keys())
 
-    def save_best_score(self, score: int) -> None:
+    def get_best_score(self) -> BestScore:
+        """최고점수 조회 (없거나 손상되면 초기화)"""
+        data = self._load_data()
+        best_score = data.get("best_score")
+
+        # best_score가 없거나 유효하지 않으면 초기화
+        if not best_score or not self._is_valid_best_score(best_score):
+            data["best_score"] = self.DEFAULT_BEST_SCORE.copy()
+            self._save_data(data)
+            best_score = data["best_score"]
+
+        return BestScore.from_dict(best_score)
+
+    def save_best_score(self, best_score: BestScore) -> None:
         """최고점수 갱신"""
         data = self._load_data()
-        data["best_score"] = score
+        data["best_score"] = best_score.to_dict()
         self._save_data(data)

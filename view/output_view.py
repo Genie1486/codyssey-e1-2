@@ -1,5 +1,5 @@
 from constants.menu_format import MenuFormat
-from model.quiz import Quiz
+from model import Quiz, BestScore
 
 
 class OutputView:
@@ -33,3 +33,15 @@ class OutputView:
     @classmethod
     def display_message(cls, message: str):
         print(message)
+
+    @classmethod
+    def display_best_score(cls, best_score: BestScore):
+        # 🏆 최고 점수: 80점 (5문제 중 4문제 정답)
+        print(MenuFormat.NEWLINE.value)
+        if best_score is None:
+            print("아직 최고 점수가 없습니다.")
+        else:
+            print(
+                f"🏆 최고 점수: {best_score.score}점 ({best_score.total}문제 중 {best_score.correct}문제 정답)"
+            )
+        print(MenuFormat.NEWLINE.value)

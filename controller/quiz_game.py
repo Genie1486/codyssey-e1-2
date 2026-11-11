@@ -35,7 +35,7 @@ class QuizGame:
         elif choice == Menu.LIST.number:
             self._show_quiz_list()
         elif choice == Menu.SCORE.number:
-            print("퀴즈 점수확인 메뉴를 선택하였습니다.")
+            self.show_best_score()
 
     def _show_menu(self) -> None:
         display_names = [menu.display_name for menu in Menu]
@@ -50,3 +50,9 @@ class QuizGame:
         if message:
             OutputView.display_message(message)
         OutputView.display_quiz_list(quizzes)
+
+    def show_best_score(self):
+        best_score, message = self.service.get_best_score()
+        if message:
+            OutputView.display_message(message)
+        OutputView.display_best_score(best_score)

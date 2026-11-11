@@ -9,7 +9,7 @@ from exceptions.repository_exceptions import (
     QuizFileIOError,
     QuizFileNotFoundError,
 )
-from model.quiz import Quiz
+from model import Quiz, BestScore
 from repository.quiz_repository import QuizRepository
 
 
@@ -130,32 +130,48 @@ class TestQuizRepositoryBestScoreCRUD(unittest.TestCase):
 
     def test_get_best_score_returns_score(self):
         """get_best_score() 동작 확인"""
-        fake_data = {"quizzes": [], "best_score": 100}
+        fake_data = {
+            "quizzes": [],
+            "best_score": {"score": 80, "correct": 4, "total": 5},
+        }
 
         with patch.object(self.repo, "_load_data", return_value=fake_data):
-            result = self.repo.get_best_score()
+            best_score = self.repo.get_best_score()
 
-        self.assertEqual(result, 100)
+        self.assertEqual(best_score.score, 80)
 
     def test_get_best_score_returns_zero_when_no_key(self):
         """best_score 키가 없을 때 기본값 0 반환"""
         fake_data = {"quizzes": []}
 
-        with patch.object(self.repo, "_load_data", return_value=fake_data):
+        with patch.object(
+            self.repo, "_load_data", return_value=fake_data
+        ), patch.object(self.repo, "_save_data") as mock_save:
             result = self.repo.get_best_score()
 
-        self.assertEqual(result, 0)
+        self.assertEqual(result.score, 0)
+
+        expected_data = {
+            "quizzes": [],
+            "best_score": {"score": 0, "correct": 0, "total": 0},
+        }
+        mock_save.assert_called_once_with(expected_data)
 
     def test_update_best_score_saves_new_score(self):
         """update_best_score()가 새로운 score를 저장하는 지 확인"""
-        fake_data = {"quizzes": [], "best_score": 100}
+        fake_data = {"quizzes": [], "best_score": {"score": 100}}
+        fake_best_score = MagicMock()
+        fake_best_score.to_dict.return_value = {"score": 80, "correct": 4, "total": 5}
 
         with patch.object(
             self.repo, "_load_data", return_value=fake_data
         ), patch.object(self.repo, "_save_data") as mock_save:
-            self.repo.save_best_score(300)
+            self.repo.save_best_score(fake_best_score)
 
-        expected_data = {"quizzes": [], "best_score": 300}
+        expected_data = {
+            "quizzes": [],
+            "best_score": {"score": 80, "correct": 4, "total": 5},
+        }
         mock_save.assert_called_once_with(expected_data)
 
 
