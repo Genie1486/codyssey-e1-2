@@ -29,3 +29,7 @@ class OutputView:
             print(f"[{i}] {quiz.question}")
         print(MenuFormat.DIVIDER.value)
         print(MenuFormat.NEWLINE.value)
+
+    @classmethod
+    def display_message(cls, message: str):
+        print(message)

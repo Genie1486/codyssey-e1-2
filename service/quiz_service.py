@@ -27,19 +27,27 @@ class QuizService:
 
             # 퀴즈 개수 없으면 기본 데이터 로드
             if not quizzes:
-                print(QuizMessage.NO_QUIZZES.value)  # TODO: 출력은 View로 분리 필요
-                return self._load_and_save_default_quizzes()
+                return (
+                    self._load_and_save_default_quizzes(),
+                    QuizMessage.NO_QUIZZES.value,
+                )
 
-            return quizzes
+            return quizzes, None
 
         except QuizFileNotFoundError:
-            print(QuizMessage.FILE_NOT_FOUND.value)  # TODO: 출력은 View로 분리 필요
-            return self._load_and_save_default_quizzes()
+            return (
+                self._load_and_save_default_quizzes(),
+                QuizMessage.FILE_NOT_FOUND.value,
+            )
 
         except QuizFileCorruptedError:
-            print(QuizMessage.FILE_CORRUPTED.value)  # TODO: 출력은 View로 분리 필요
-            return self._load_and_save_default_quizzes()
+            return (
+                self._load_and_save_default_quizzes(),
+                QuizMessage.FILE_CORRUPTED.value,
+            )
 
         except QuizFileIOError:
-            print(QuizMessage.FILE_IO_ERROR.value)  # TODO: 출력은 View로 분리 필요
-            return self._load_and_save_default_quizzes()
+            return (
+                self._load_and_save_default_quizzes(),
+                QuizMessage.FILE_IO_ERROR.value,
+            )

@@ -46,5 +46,7 @@ class QuizGame:
         return InputView.get_menu_choice(min_val, max_val)
 
     def _show_quiz_list(self) -> None:
-        quizzes = self.service.get_all_quizzes()
+        quizzes, message = self.service.get_all_quizzes()
+        if message:
+            OutputView.display_message(message)
         OutputView.display_quiz_list(quizzes)
