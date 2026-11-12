@@ -8,6 +8,7 @@ from exceptions.repository_exceptions import (
     QuizFileIOError,
 )
 from constants.error_message import QuizMessage
+import random
 
 T = TypeVar("T")
 
@@ -105,3 +106,8 @@ class QuizService:
             self.repository.save_best_score(BestScore.from_dict(current_score))
             return True
         return False
+
+    def get_shuffled_quizzes(self, quizzes: list[Quiz]) -> list[Quiz]:
+        shuffled = quizzes.copy()
+        random.shuffle(shuffled)
+        return shuffled

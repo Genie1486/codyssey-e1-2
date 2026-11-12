@@ -82,7 +82,9 @@ class QuizGame:
             OutputView.display_no_quiz()
             return
 
-        user_correct = self._play_all_quizzes(quizzes)
+        shuffled_quizzes = self.service.get_shuffled_quizzes(quizzes)
+
+        user_correct = self._play_all_quizzes(shuffled_quizzes)
 
         self._display_and_save_result(user_correct, len(quizzes))
 
