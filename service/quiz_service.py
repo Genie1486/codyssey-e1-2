@@ -108,6 +108,12 @@ class QuizService:
         return False
 
     def get_shuffled_quizzes(self, quizzes: list[Quiz]) -> list[Quiz]:
+        """퀴즈 랜덤 출제"""
         shuffled = quizzes.copy()
         random.shuffle(shuffled)
         return shuffled
+
+    def get_quizzes_by_count(self, quizzes: list[Quiz], count: int) -> list[Quiz]:
+        """개수 만큼 퀴즈 출제"""
+        shuffled_quizzes = self.get_shuffled_quizzes(quizzes)
+        return shuffled_quizzes[:count]

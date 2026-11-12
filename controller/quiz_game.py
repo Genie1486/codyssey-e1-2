@@ -82,11 +82,13 @@ class QuizGame:
             OutputView.display_no_quiz()
             return
 
-        shuffled_quizzes = self.service.get_shuffled_quizzes(quizzes)
+        problem_count = InputView.get_quiz_count(1, len(quizzes))
 
-        user_correct = self._play_all_quizzes(shuffled_quizzes)
+        selected_quizzes = self.service.get_quizzes_by_count(quizzes, problem_count)
 
-        self._display_and_save_result(user_correct, len(quizzes))
+        user_correct = self._play_all_quizzes(selected_quizzes)
+
+        self._display_and_save_result(user_correct, len(selected_quizzes))
 
     # ===== 헬퍼메서드 =====
 
