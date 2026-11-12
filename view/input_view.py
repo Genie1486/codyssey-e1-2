@@ -7,10 +7,22 @@ class InputView:
     CHOICE_I = "선택지 {}: "
     ANSWER = "정답번호 (1-4): "
     HINT = "힌트 (선택사항, 엔터 입력 시 등록 안 함): "
+    INPUT_ANSWER = "정답 입력: "
+
+    @classmethod
+    def get_number_in_range(cls, prompt: str, min_val: int, max_val: int) -> int:
+        """범위 내의 정수를 입력받음"""
+        return cls._get_user_number_until_valid(prompt, min_val, max_val)
+
+    @classmethod
+    def get_quiz_answer(cls, min_val: int, max_val: int) -> int:
+        """퀴즈 답변 입력"""
+        return cls.get_number_in_range(cls.INPUT_ANSWER, min_val, max_val)
 
     @classmethod
     def get_menu_choice(cls, min_val: int, max_val: int) -> int:
-        return cls._get_user_number_until_valid(cls.CHOICE, min_val, max_val)
+        """메뉴 선택 입력"""
+        return cls.get_number_in_range(cls.CHOICE, min_val, max_val)
 
     @classmethod
     def get_quiz_input(cls):

@@ -80,3 +80,28 @@ class QuizService:
             return True
         except (QuizFileNotFoundError, QuizFileCorruptedError, QuizFileIOError) as e:
             return False
+
+    def is_correct(self, quiz: Quiz, user_answer: int) -> bool:
+        """사용자 답이 정답인지 확인"""
+        return quiz.answer == user_answer
+
+    def calculate_score(self, user_correct: int, total: int) -> dict:
+        """정답률 계산 (소수 둘째자리)"""
+        if total == 0:
+            score = 0.0
+        else:
+            score = round((user_correct / total) * 100, 2)
+
+        return {"score": score, "correct": user_correct, "total": total}
+
+    def _is_new_best_score(self, current_score: dict) -> bool:
+        """현재 점수가 최고 점수보다 높은지 확인"""
+        best_score = self.repository.get_best_score()
+        return current_score["score"] > best_score.score
+
+    def update_best_score_if_needed(self, current_score: dict) -> bool:
+        """필요하면 최고 점수 업데이트"""
+        if self._is_new_best_score(current_score):
+            self.repository.save_best_score(BestScore.from_dict(current_score))
+            return True
+        return False
