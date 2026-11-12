@@ -5,6 +5,8 @@ from model import Quiz, BestScore
 class OutputView:
     TITLE = "🎯 나만의 퀴즈 게임 🎯"
     QUIZ_LIST = "📋 등록된 퀴즈 목록 (총 {}개)"
+    ADD_QUIZ = "📌 새로운 퀴즈를 추가합니다."
+    ADD_QUIZ_COMPLETE_MESSAGE = "✅ 퀴즈가 추가되었습니다!"
 
     @classmethod
     def display_menu(cls, menus: list[str]) -> None:
@@ -44,4 +46,16 @@ class OutputView:
             print(
                 f"🏆 최고 점수: {best_score.score}점 ({best_score.total}문제 중 {best_score.correct}문제 정답)"
             )
+        print(MenuFormat.NEWLINE.value)
+
+    @classmethod
+    def display_add_quiz_success_result(self):
+        print(MenuFormat.NEWLINE.value)
+        print(self.ADD_QUIZ_COMPLETE_MESSAGE)
+        print(MenuFormat.NEWLINE.value)
+
+    @classmethod
+    def display_add_quiz_start(self):
+        print(MenuFormat.NEWLINE.value)
+        print(self.ADD_QUIZ)
         print(MenuFormat.NEWLINE.value)

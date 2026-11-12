@@ -68,3 +68,15 @@ class QuizService:
             return best_score, None
         except (QuizFileNotFoundError, QuizFileCorruptedError, QuizFileIOError) as e:
             return self._handle_file_error(e, self.default_best_score)
+
+    def add_quiz(self, quiz_data: dict) -> bool:
+        """
+        반환값: True (성공), False (실패)
+        에러메시지는 OutputView에서 처리
+        """
+        try:
+            quiz = Quiz.from_dict(quiz_data)
+            self.repository.save_quiz(quiz)
+            return True
+        except (QuizFileNotFoundError, QuizFileCorruptedError, QuizFileIOError) as e:
+            return False

@@ -2,12 +2,14 @@ from enum import Enum
 
 
 class ErrorMessage(Enum):
-    EMPTY_INPUT = "⚠️  입력이 없습니다. {}-{} 사이의 정수를 입력하세요."
-    INVALID_TYPE = "⚠️  정수 변환에 실패했습니다. {}-{} 사이의 정수를 입력하세요."
-    OUT_OF_RANGE = "⚠️  잘못된 입력입니다. {}-{} 사이의 숫자를 입력해주세요."
+    EMPTY_INPUT = "⚠️  입력이 없습니다."
+    NUMBER_RANGE = "{}-{} 사이의 정수를 입력하세요."
+    NOT_AN_INTEGER = "⚠️  정수 변환에 실패했습니다."
+    OUT_OF_RANGE = "⚠️  범위에 맞지 않는 숫자입니다."
 
 
 class QuizMessage(Enum):
+    QUIZ_ADD_FAILED = "⚠️  퀴즈 추가 실패하였습니다."
     FILE_NOT_FOUND = (
         "⚠️  퀴즈 파일을 찾을 수 없습니다.\n📝 기본 퀴즈로 초기화합니다...\n"
     )

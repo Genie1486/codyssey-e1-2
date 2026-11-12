@@ -93,5 +93,50 @@ quiz_game_app/
 
 ## 6. 데이터 파일 설명 (state.json 경로, 역할, 스키마)
 
+
+```json
+{
+    "quizzes": [
+        {
+            "id": 1,
+            "question": "The manager requested that all employees _______ the mandatory training session next Monday.",
+            "choices": [
+                "attend",
+                "attends",
+                "attended",
+                "will attend"
+            ],
+            "answer": 0,
+            "hint": "request, suggest, insist, recommend 등의 동사 뒤에 오는 that절에서는 동사원형을 써요!"
+        },
+        {
+            "id": 2,
+            "question": "The new policy will be implemented _______ all departments have reviewed and approved the proposal.",
+            "choices": [
+                "despite",
+                "once",
+                "although",
+                "so that"
+            ],
+            "answer": 1
+        }
+    ],
+    "best_score": {
+        "score": 0,
+        "correct": 0,
+        "total": 0
+    },
+    "score_history": [
+        {
+            "date": "2024-01-15",
+            "time": "14:30:45",
+            "correct": 3,
+            "total": 5,
+            "score": 60
+        }
+    ]
+}
+```
+
 ## 7. 트러블 슈팅
 - 테스트 코드 도입(main.py에서 테스트 코드 만들었는데... 코드를 보존하고 싶었음)
