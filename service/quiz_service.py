@@ -14,6 +14,8 @@ T = TypeVar("T")
 
 
 class QuizService:
+    HINT_PENALTY = 10  # 힌트당 10점 차감
+
     def __init__(self, file_path: str) -> None:
         self.repository = QuizRepository(file_path)
 
@@ -86,14 +88,24 @@ class QuizService:
         """사용자 답이 정답인지 확인"""
         return quiz.answer == user_answer
 
-    def calculate_score(self, user_correct: int, total: int) -> dict:
+    def calculate_score(
+        self, user_correct: int, total: int, hint_view_cnt: int
+    ) -> dict:
         """정답률 계산 (소수 둘째자리)"""
         if total == 0:
             score = 0.0
         else:
-            score = round((user_correct / total) * 100, 2)
+            score = (
+                round((user_correct / total) * 100, 2)
+                - hint_view_cnt * self.HINT_PENALTY
+            )
 
-        return {"score": score, "correct": user_correct, "total": total}
+        return {
+            "score": score,
+            "correct": user_correct,
+            "total": total,
+            "hint_view_cnt": hint_view_cnt,
+        }
 
     def _is_new_best_score(self, current_score: dict) -> bool:
         """현재 점수가 최고 점수보다 높은지 확인"""

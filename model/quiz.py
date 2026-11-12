@@ -3,7 +3,7 @@ class Quiz:
         self.question = kwargs.get("question", "")
         self.choices = kwargs.get("choices", [])
         self.answer = kwargs.get("answer", 0)
-        self.hint = kwargs.get("hint", "힌트가 등록되지 않았습니다.")
+        self.hint = kwargs.get("hint", "")
 
     def info(self):
         print(self.question)
@@ -22,6 +22,9 @@ class Quiz:
             bool: 정답이면 True, 아니면 False
         """
         return self.answer == user_answer
+
+    def has_hint(self) -> bool:
+        return self.hint != ""
 
     def to_dict(self) -> dict:
         return {

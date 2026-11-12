@@ -12,12 +12,18 @@ class OutputView:
     CORRECT = "✅ 정답입니다!"
     INCORRECT = "❌ 오답입니다!"
     CORRECT_ANSWER = "정답: {answer}번"
-    RESULT_SCORE = "🏆 결과: {total}문제 중 {correct}문제 정답! ({score}점)"
+    RESULT_SCORE_HEADER = "🏆 결과: {total}문제 중 {correct}문제 정답!"
+    RESULT_SCORE_BODY = (
+        "힌트 본 횟수: {hint_view_cnt}회 ({hint_view_cnt}*10 점 차감)\n총점: {score}점"
+    )
     NEW_RECORD = "🎉 새로운 최고 점수입니다!"
     NO_QUIZ = "퀴즈가 없습니다."
     NO_BEST_SCORE = "아직 최고 점수가 없습니다."
     BEST_SCORE = "🏆 최고 점수: {score}점 ({total}문제 중 {correct}문제 정답)"
     EXIT_MESSAGE = "프로그램을 종료합니다."
+    HINT_NOTICE = "💡 이 문제는 힌트가 있습니다."
+    HINT = "💡 힌트: {hint}"
+    HINT_ALREADY_VIEWED = "이미 힌트를 봤습니다"
 
     @classmethod
     def display_menu(cls, menus: list[str]) -> None:
@@ -93,6 +99,8 @@ class OutputView:
             print(f"{i}. {choice}")
 
         print(MenuFormat.NEWLINE.value)
+        if quiz.has_hint():
+            print(cls.HINT_NOTICE)
 
     @classmethod
     def display_no_quiz(cls) -> None:
@@ -118,11 +126,34 @@ class OutputView:
 
     @classmethod
     def display_quiz_result(cls, user_score: dict, is_new_record: bool) -> None:
+
         print(MenuFormat.DIVIDER_EQUAL.value)
-        print(cls.RESULT_SCORE.format(**user_score))
+
+        print(
+            cls.RESULT_SCORE_HEADER.format(
+                total=user_score["total"], correct=user_score["correct"]
+            )
+        )
+        print(
+            cls.RESULT_SCORE_BODY.format(
+                hint_view_cnt=user_score["hint_view_cnt"],
+                score=user_score["score"],
+            )
+        )
 
         if is_new_record:
             print(cls.NEW_RECORD)
         print(MenuFormat.DIVIDER_EQUAL.value)
         print(MenuFormat.NEWLINE.value)
         print(MenuFormat.NEWLINE.value)
+
+    @classmethod
+    def display_hint(cls, hint: str) -> None:
+        """힌트 표시"""
+        print(MenuFormat.NEWLINE.value)
+        print(cls.HINT.format(hint=hint))
+
+    @classmethod
+    def display_hint_aleady_viewed(cls) -> None:
+        """이미 힌트를 봤음을 표시"""
+        print(cls.HINT_ALREADY_VIEWED)

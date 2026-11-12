@@ -7,7 +7,8 @@ class InputView:
     CHOICE_I = "선택지 {}: "
     ANSWER = "정답번호 (1-4): "
     HINT = "힌트 (선택사항, 엔터 입력 시 등록 안 함): "
-    INPUT_ANSWER = "정답 입력: "
+    INPUT_ANSWER = "정답 입력 (1~4):  "
+    INPUT_ANSWER_WITH_HINT = "정답 입력 (1~4, 힌트는 0): "
     QUIZ_COUNT = "몇 문제를 푸시겠습니까? ({min_val}~{max_val} 숫자 입력): "
 
     @classmethod
@@ -19,6 +20,11 @@ class InputView:
     def get_quiz_answer(cls, min_val: int, max_val: int) -> int:
         """퀴즈 답변 입력"""
         return cls.get_number_in_range(cls.INPUT_ANSWER, min_val, max_val)
+
+    @classmethod
+    def get_quiz_answer_or_hint(cls, min_val: int, max_val: int) -> int:
+        """퀴즈 답변 입력"""
+        return cls.get_number_in_range(cls.INPUT_ANSWER_WITH_HINT, min_val, max_val)
 
     @classmethod
     def get_menu_choice(cls, min_val: int, max_val: int) -> int:

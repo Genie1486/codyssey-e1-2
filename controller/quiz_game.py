@@ -86,36 +86,70 @@ class QuizGame:
 
         selected_quizzes = self.service.get_quizzes_by_count(quizzes, problem_count)
 
-        user_correct = self._play_all_quizzes(selected_quizzes)
+        user_correct, hint_view_cnt = self._play_all_quizzes(selected_quizzes)
 
-        self._display_and_save_result(user_correct, len(selected_quizzes))
+        self._display_and_save_result(
+            user_correct, len(selected_quizzes), hint_view_cnt
+        )
 
     # ===== 헬퍼메서드 =====
 
     def _play_all_quizzes(self, quizzes):
         """모든 퀴즈 풀기"""
         user_correct = 0
+        hint_view_cnt = 0
 
         for i, quiz in enumerate(quizzes, start=1):
-            if self._play_single_quiz(quiz, i):
+            is_correct, hint_viewed = self._play_single_quiz(quiz, i)
+
+            if is_correct:
                 user_correct += 1
+            if hint_viewed:
+                hint_view_cnt += 1
 
-        return user_correct
+        return user_correct, hint_view_cnt
 
-    def _play_single_quiz(self, quiz: Quiz, question_number: int) -> bool:
+    def _play_single_quiz(self, quiz: Quiz, question_number: int) -> tuple:
         """1개 퀴즈 풀기"""
         OutputView.display_quiz(quiz, question_number)
-        user_answer = InputView.get_quiz_answer(1, 4)
+
+        user_answer, hint_viewed = self._get_user_answer(quiz)
 
         if self.service.is_correct(quiz, user_answer):
             OutputView.display_correct()
-            return True
+            return True, hint_viewed
         else:
             OutputView.display_incorrect(quiz.answer)
-            return False
+            return False, hint_viewed
 
-    def _display_and_save_result(self, user_correct: int, total_quiz_count: int):
+    def _get_user_answer(self, quiz: Quiz):
+        """사용자 답변 입력받기 (힌트 처리 포함)"""
+        hint_viewed = False
+
+        if not quiz.has_hint():
+            return InputView.get_quiz_answer(1, 4), hint_viewed
+
+        while True:
+            user_input = InputView.get_quiz_answer_or_hint(0, 4)
+
+            # 힌트 요청 (0 입력)
+            if user_input == 0:
+                if not hint_viewed:
+                    OutputView.display_hint(quiz.hint)
+                    hint_viewed = True
+                else:
+                    OutputView.display_hint_aleady_viewed()
+                continue
+
+            # 정답 입력 (1~4)
+            return user_input, hint_viewed
+
+    def _display_and_save_result(
+        self, user_correct: int, total_quiz_count: int, hint_view_cnt: int
+    ):
         """결과 표시 및 저장"""
-        user_score = self.service.calculate_score(user_correct, total_quiz_count)
+        user_score = self.service.calculate_score(
+            user_correct, total_quiz_count, hint_view_cnt
+        )
         is_update_best_score = self.service.update_best_score_if_needed(user_score)
         OutputView.display_quiz_result(user_score, is_update_best_score)
