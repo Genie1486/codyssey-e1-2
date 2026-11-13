@@ -25,23 +25,20 @@ class OutputView:
     HINT = "💡 힌트: {hint}"
     HINT_ALREADY_VIEWED = "이미 힌트를 봤습니다"
 
-    @classmethod
-    def display_menu(cls, menus: list[str]) -> None:
+    def display_menu(self, menus: list[str]) -> None:
         print(MenuFormat.DIVIDER_EQUAL.value)
-        print(f"{MenuFormat.PADDING.value}{cls.TITLE}")
+        print(f"{MenuFormat.PADDING.value}{self.TITLE}")
         print(MenuFormat.DIVIDER_EQUAL.value)
         for i, menu in enumerate(menus, start=1):
             print(f"{i}. {menu}")
         print(MenuFormat.DIVIDER_EQUAL.value)
 
-    @classmethod
-    def display_exit(cls) -> None:
-        print(cls.EXIT_MESSAGE)
+    def display_exit(self) -> None:
+        print(self.EXIT_MESSAGE)
 
-    @classmethod
-    def display_quiz_list(cls, quizzes: list[Quiz]) -> None:  # 목록 출력
+    def display_quiz_list(self, quizzes: list[Quiz]) -> None:  # 목록 출력
         print(MenuFormat.NEWLINE.value)
-        title = cls.QUIZ_LIST.format(len(quizzes))
+        title = self.QUIZ_LIST.format(len(quizzes))
         print(f"{MenuFormat.PADDING.value}{title}")
         print(MenuFormat.DIVIDER_DASH.value)
         for i, quiz in enumerate(quizzes, start=1):
@@ -49,19 +46,17 @@ class OutputView:
         print(MenuFormat.DIVIDER_DASH.value)
         print(MenuFormat.NEWLINE.value)
 
-    @classmethod
-    def display_message(cls, message: str) -> None:
+    def display_message(self, message: str) -> None:
         print(message)
 
-    @classmethod
-    def display_best_score(cls, best_score: BestScore) -> None:
+    def display_best_score(self, best_score: BestScore) -> None:
         # 🏆 최고 점수: 80점 (5문제 중 4문제 정답)
         print(MenuFormat.NEWLINE.value)
         if best_score is None:
-            print(cls.NO_BEST_SCORE)
+            print(self.NO_BEST_SCORE)
         else:
             print(
-                cls.BEST_SCORE.format(
+                self.BEST_SCORE.format(
                     score=best_score.score,
                     total=best_score.total,
                     correct=best_score.correct,
@@ -69,29 +64,25 @@ class OutputView:
             )
         print(MenuFormat.NEWLINE.value)
 
-    @classmethod
-    def display_add_quiz_success_result(cls) -> None:
+    def display_add_quiz_success_result(self) -> None:
         print(MenuFormat.NEWLINE.value)
-        print(cls.ADD_QUIZ_COMPLETE_MESSAGE)
-        print(MenuFormat.NEWLINE.value)
-
-    @classmethod
-    def display_add_quiz_start(cls) -> None:
-        print(MenuFormat.NEWLINE.value)
-        print(cls.ADD_QUIZ)
+        print(self.ADD_QUIZ_COMPLETE_MESSAGE)
         print(MenuFormat.NEWLINE.value)
 
-    @classmethod
-    def display_quiz_start(cls, total_quiz_count: int) -> None:
+    def display_add_quiz_start(self) -> None:
         print(MenuFormat.NEWLINE.value)
-        print(cls.QUIZ_START.format(total=total_quiz_count))
+        print(self.ADD_QUIZ)
+        print(MenuFormat.NEWLINE.value)
+
+    def display_quiz_start(self, total_quiz_count: int) -> None:
+        print(MenuFormat.NEWLINE.value)
+        print(self.QUIZ_START.format(total=total_quiz_count))
         print(MenuFormat.NEWLINE.value)
         print(MenuFormat.NEWLINE.value)
         print(MenuFormat.DIVIDER_EQUAL.value)
 
-    @classmethod
-    def display_quiz(cls, quiz: Quiz, quiz_number: int) -> None:
-        print(cls.QUESTION_NUMBER.format(number=quiz_number))
+    def display_quiz(self, quiz: Quiz, quiz_number: int) -> None:
+        print(self.QUESTION_NUMBER.format(number=quiz_number))
         print(quiz.question)
         print(MenuFormat.NEWLINE.value)
 
@@ -100,60 +91,54 @@ class OutputView:
 
         print(MenuFormat.NEWLINE.value)
         if quiz.has_hint():
-            print(cls.HINT_NOTICE)
+            print(self.HINT_NOTICE)
 
-    @classmethod
-    def display_no_quiz(cls) -> None:
-        print(cls.NO_QUIZ)
+    def display_no_quiz(self) -> None:
+        print(self.NO_QUIZ)
         print(MenuFormat.NEWLINE.value)
         print(MenuFormat.NEWLINE.value)
         print(MenuFormat.DIVIDER_DASH.value)
 
-    @classmethod
-    def display_correct(cls) -> None:
-        print(cls.CORRECT)
+    def display_correct(self) -> None:
+        print(self.CORRECT)
         print(MenuFormat.NEWLINE.value)
         print(MenuFormat.NEWLINE.value)
         print(MenuFormat.DIVIDER_DASH.value)
 
-    @classmethod
-    def display_incorrect(cls, correct_answer: int) -> None:
-        print(cls.INCORRECT)
-        print(cls.CORRECT_ANSWER.format(answer=correct_answer))
+    def display_incorrect(self, correct_answer: int) -> None:
+        print(self.INCORRECT)
+        print(self.CORRECT_ANSWER.format(answer=correct_answer))
         print(MenuFormat.NEWLINE.value)
         print(MenuFormat.NEWLINE.value)
         print(MenuFormat.DIVIDER_DASH.value)
 
-    @classmethod
-    def display_quiz_result(cls, user_score: dict, is_new_record: bool) -> None:
+    def display_quiz_result(self, user_score: dict, is_new_record: bool) -> None:
 
         print(MenuFormat.DIVIDER_EQUAL.value)
 
         print(
-            cls.RESULT_SCORE_HEADER.format(
+            self.RESULT_SCORE_HEADER.format(
                 total=user_score["total"], correct=user_score["correct"]
             )
         )
         print(
-            cls.RESULT_SCORE_BODY.format(
+            self.RESULT_SCORE_BODY.format(
                 hint_view_cnt=user_score["hint_view_cnt"],
                 score=user_score["score"],
             )
         )
 
         if is_new_record:
-            print(cls.NEW_RECORD)
+            print(self.NEW_RECORD)
         print(MenuFormat.DIVIDER_EQUAL.value)
         print(MenuFormat.NEWLINE.value)
         print(MenuFormat.NEWLINE.value)
 
-    @classmethod
-    def display_hint(cls, hint: str) -> None:
+    def display_hint(self, hint: str) -> None:
         """힌트 표시"""
         print(MenuFormat.NEWLINE.value)
-        print(cls.HINT.format(hint=hint))
+        print(self.HINT.format(hint=hint))
 
-    @classmethod
-    def display_hint_aleady_viewed(cls) -> None:
+    def display_hint_aleady_viewed(self) -> None:
         """이미 힌트를 봤음을 표시"""
-        print(cls.HINT_ALREADY_VIEWED)
+        print(self.HINT_ALREADY_VIEWED)

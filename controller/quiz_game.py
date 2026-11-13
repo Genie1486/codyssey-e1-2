@@ -1,21 +1,17 @@
 from view import InputView, OutputView
+from service.quiz_service import QuizService
 from model.quiz import Quiz
 from constants.menu import Menu
-from service.quiz_service import QuizService
-import os
 from constants.error_message import QuizMessage
 
 
 class QuizGame:
-    def __init__(self):
-        # 현재 파일(quiz_controller.py)의 디렉토리
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        # controller/ → project/ (부모 디렉토리)
-        project_dir = os.path.dirname(base_dir)
-        # project/state.json
-        file_path = os.path.join(project_dir, "state.json")
-
-        self.service = QuizService(file_path)
+    def __init__(
+        self, quiz_service: QuizService, input_view: InputView, output_view: OutputView
+    ):
+        self.quiz_service = quiz_service
+        self.input_view = input_view
+        self.output_view = output_view
 
     def run(self):
         while True:
@@ -23,7 +19,7 @@ class QuizGame:
             choice = self._get_choice()
 
             if choice == Menu.EXIT.number:
-                OutputView.display_exit()
+                self.output_view.display_exit()
                 break
 
             self._handle_menu(choice)
@@ -40,51 +36,53 @@ class QuizGame:
 
     def show_menu(self) -> None:
         display_names = [menu.display_name for menu in Menu]
-        OutputView.display_menu(display_names)
+        self.output_view.display_menu(display_names)
 
     def _get_choice(self) -> int:
         min_val, max_val = Menu.number_range()
-        return InputView.get_menu_choice(min_val, max_val)
+        return self.input_view.get_menu_choice(min_val, max_val)
 
     def show_quiz_list(self) -> None:
-        quizzes, message = self.service.get_all_quizzes()
+        quizzes, message = self.quiz_service.get_all_quizzes()
         if message:
-            OutputView.display_message(message)
-        OutputView.display_quiz_list(quizzes)
+            self.output_view.display_message(message)
+        self.output_view.display_quiz_list(quizzes)
 
     def show_best_score(self) -> None:
-        best_score, message = self.service.get_best_score()
+        best_score, message = self.quiz_service.get_best_score()
         if message:
-            OutputView.display_message(message)
-        OutputView.display_best_score(best_score)
+            self.output_view.display_message(message)
+        self.output_view.display_best_score(best_score)
 
     def add_quiz(self) -> None:
         # 1. 시작 메시지
-        OutputView.display_add_quiz_start()
+        self.output_view.display_add_quiz_start()
 
         # 2. 입력받기
-        quiz_data = InputView.get_quiz_input()
+        quiz_data = self.input_view.get_quiz_input()
 
         # 3. 서비스 처리
-        is_success = self.service.add_quiz(quiz_data)
+        is_success = self.quiz_service.add_quiz(quiz_data)
 
         if is_success:
-            OutputView.display_add_quiz_success_result()
+            self.output_view.display_add_quiz_success_result()
         else:
-            OutputView.display_message(QuizMessage.ADD_FAILED.value)
+            self.output_view.display_message(QuizMessage.ADD_FAILED.value)
 
     def play_quiz(self) -> None:
-        quizzes, _ = self.service.get_all_quizzes()
+        quizzes, _ = self.quiz_service.get_all_quizzes()
 
-        OutputView.display_quiz_start(len(quizzes))
+        self.output_view.display_quiz_start(len(quizzes))
 
         if len(quizzes) == 0:
-            OutputView.display_no_quiz()
+            self.output_view.display_no_quiz()
             return
 
-        problem_count = InputView.get_quiz_count(1, len(quizzes))
+        problem_count = self.input_view.get_quiz_count(1, len(quizzes))
 
-        selected_quizzes = self.service.get_quizzes_by_count(quizzes, problem_count)
+        selected_quizzes = self.quiz_service.get_quizzes_by_count(
+            quizzes, problem_count
+        )
 
         user_correct, hint_view_cnt = self._play_all_quizzes(selected_quizzes)
 
@@ -111,15 +109,15 @@ class QuizGame:
 
     def _play_single_quiz(self, quiz: Quiz, question_number: int) -> tuple:
         """1개 퀴즈 풀기"""
-        OutputView.display_quiz(quiz, question_number)
+        self.output_view.display_quiz(quiz, question_number)
 
         user_answer, hint_viewed = self._get_user_answer(quiz)
 
-        if self.service.is_correct(quiz, user_answer):
-            OutputView.display_correct()
+        if self.quiz_service.is_correct(quiz, user_answer):
+            self.output_view.display_correct()
             return True, hint_viewed
         else:
-            OutputView.display_incorrect(quiz.answer)
+            self.output_view.display_incorrect(quiz.answer)
             return False, hint_viewed
 
     def _get_user_answer(self, quiz: Quiz):
@@ -127,18 +125,18 @@ class QuizGame:
         hint_viewed = False
 
         if not quiz.has_hint():
-            return InputView.get_quiz_answer(1, 4), hint_viewed
+            return self.input_view.get_quiz_answer(1, 4), hint_viewed
 
         while True:
-            user_input = InputView.get_quiz_answer_or_hint(0, 4)
+            user_input = self.input_view.get_quiz_answer_or_hint(0, 4)
 
             # 힌트 요청 (0 입력)
             if user_input == 0:
                 if not hint_viewed:
-                    OutputView.display_hint(quiz.hint)
+                    self.output_view.display_hint(quiz.hint)
                     hint_viewed = True
                 else:
-                    OutputView.display_hint_aleady_viewed()
+                    self.output_view.display_hint_aleady_viewed()
                 continue
 
             # 정답 입력 (1~4)
@@ -148,8 +146,8 @@ class QuizGame:
         self, user_correct: int, total_quiz_count: int, hint_view_cnt: int
     ):
         """결과 표시 및 저장"""
-        user_score = self.service.calculate_score(
+        user_score = self.quiz_service.calculate_score(
             user_correct, total_quiz_count, hint_view_cnt
         )
-        is_update_best_score = self.service.update_best_score_if_needed(user_score)
-        OutputView.display_quiz_result(user_score, is_update_best_score)
+        is_update_best_score = self.quiz_service.update_best_score_if_needed(user_score)
+        self.output_view.display_quiz_result(user_score, is_update_best_score)
