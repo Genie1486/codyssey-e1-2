@@ -54,11 +54,22 @@
             ],
             "answer": 3,
             "hint": "마감 기한을 나타낼 때 쓰는 전치사를 고르세요! '~까지 (완료)'의 의미예요."
+        },
+        {
+            "question": "ㄴㅁ",
+            "choices": [
+                "1",
+                "2",
+                "3",
+                "4"
+            ],
+            "answer": 1,
+            "hint": "ㅁㄴㄹ"
         }
     ],
     "best_score": {
-        "score": 0,
-        "correct": 0,
-        "total": 0
+        "score": 53.33,
+        "correct": 5,
+        "total": 6
     }
 }

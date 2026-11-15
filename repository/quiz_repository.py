@@ -1,11 +1,8 @@
+from model import Quiz, BestScore, GameState
+
 import json
-from model import Quiz, BestScore
-from common.exceptions.repository_exceptions import (
-    QuizFileNotFoundError,
-    QuizFileCorruptedError,
-    QuizFileIOError,
-)
 from pathlib import Path
+from copy import deepcopy
 
 
 class QuizRepository:
@@ -42,7 +39,7 @@ class QuizRepository:
         ),
     ]
 
-    DEFAULT_BEST_SCORE = {"score": 0, "correct": 0, "total": 0}
+    DEFAULT_BEST_SCORE = BestScore(0, 0, 0)
 
     def __init__(self, file_path: Path = None) -> None:  # 주입!
         if file_path is None:
@@ -52,122 +49,55 @@ class QuizRepository:
             file_path = Path(__file__).parent.parent / "state.json"
 
         self.file_path = file_path
-        data = self._load_data()
+        self.game_state = None
 
-        self._quizzes = list(map(lambda x: Quiz.from_dict(x), data.get("quizzes", [])))
+    def load_data(self) -> dict | None:
+        """저장된 파일 있으면 True 반환, 없으면 None 반환"""
+        with open(self.file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
 
-        if len(self._quizzes) == 0:
-            self._quizzes = self.DEFAULT_QUIZZES.copy()
+        return data
 
-        self._best_score = BestScore.from_dict(
-            data.get("best_score", self.DEFAULT_BEST_SCORE)
+    def set_game_state(self, game_state: GameState) -> None:
+        self.game_state = game_state
+
+    def get_default_game_state(self) -> GameState:
+        """기본값으로 game_state 생성"""
+
+        return GameState(
+            quizzes=deepcopy(self.DEFAULT_QUIZZES),
+            best_score=deepcopy(self.DEFAULT_BEST_SCORE),
         )
 
-    def _load_data(self) -> dict:
-        """파일에서 JSON 데이터 로드"""
-        try:
-            with open(self.file_path, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except FileNotFoundError as e:
-            self._initialize_file()
-            raise QuizFileNotFoundError(
-                f"파일을 찾을 수 없습니다: {self.file_path}"
-            ) from e
-        except json.JSONDecodeError as e:
-            self._initialize_file()
-            raise QuizFileCorruptedError(
-                f"JSON 파일이 손상되었습니다: {self.file_path}"
-            ) from e
-        except IOError as e:
-            raise QuizFileIOError(f"파일 읽기 중 오류 발생: {str(e)}") from e
-
-    def _get_defaults(self):
-        return self.DEFAULT_QUIZZES.copy(), self.DEFAULT_BEST_SCORE.copy()
-
-    def _initialize_file(self) -> dict:
-        """파일 없을 때 초기 state.json 생성"""
-        initial_data = {"quizzes": [], "best_score": self.DEFAULT_BEST_SCORE.copy()}
-        self._save_data(initial_data)
-        return initial_data
-
-    def _load_data(self) -> dict:
-        """파일에서 JSON 데이터 로드"""
-        try:
-            with open(self.file_path, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except FileNotFoundError as e:
-            self._initialize_file()
-            raise QuizFileNotFoundError(
-                f"파일을 찾을 수 없습니다: {self.file_path}"
-            ) from e
-        except json.JSONDecodeError as e:
-            self._initialize_file()
-            raise QuizFileCorruptedError(
-                f"JSON 파일이 손상되었습니다: {self.file_path}"
-            ) from e
-        except IOError as e:
-            raise QuizFileIOError(f"파일 읽기 중 오류 발생: {str(e)}") from e
-
-    def _save_data(self, data: dict) -> None:
-        """파일에 JSON 데이터 저장"""
-        try:
-            with open(self.file_path, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=4)
-        except IOError as e:
-            raise QuizFileIOError(f"파일 쓰기 중 오류 발생: {str(e)}") from e
+    def save_data(self) -> None:
+        """self.game_state의 내용을 state.json에 저장"""
+        with open(self.file_path, "w", encoding="utf-8") as f:
+            json.dump(self.game_state.to_dict(), f, ensure_ascii=False, indent=4)
 
     # ===== Quiz 관련  =====
     def get_all_quizzes(self) -> list[Quiz]:
         """모든 퀴즈 조회"""
-        data = self._load_data()
-        quizzes = data.get("quizzes", [])
-
-        return [Quiz.from_dict(quiz) for quiz in quizzes]
+        return self.game_state.quizzes
 
     def get_quiz_by_id(self, quiz_id):
         """특정 퀴즈 조회"""
 
     def save_quiz(self, quiz: Quiz) -> None:
         """퀴즈 추가"""
-        data = self._load_data()
-        quizzes = data.get("quizzes", [])
-        quizzes.append(quiz.to_dict())
-
-        data["quizzes"] = quizzes
-
-        self._save_data(data)
+        self.game_state.quizzes.append(quiz)
 
     def save_quizzes(self, quizzes: list[Quiz]) -> None:
         """여러 퀴즈 일괄 저장"""
-        data = self._load_data()
-        quiz_dicts = [quiz.to_dict() for quiz in quizzes]
-        data["quizzes"] = quiz_dicts  # 기존 데이터 덮어쓰기
-        self._save_data(data)
+        self.game_state.quizzes.extend(quizzes)
 
     def delete_quiz(self, quiz_id):
         """퀴즈 삭제"""
 
     # ===== BestScore 관련  =====
-    def _is_valid_best_score(self, best_score: dict) -> bool:
-        """best_score 유효성 검증"""
-        required_keys = {"score", "correct", "total"}
-        return required_keys.issubset(best_score.keys())
-
     def get_best_score(self) -> BestScore:
-        """최고점수 조회 (없거나 손상되면 초기화)"""
-        data = self._load_data()
-        best_score = data.get("best_score")
-
-        # best_score가 없거나 유효하지 않으면 초기화
-        if not best_score or not self._is_valid_best_score(best_score):
-            data["best_score"] = self.DEFAULT_BEST_SCORE.copy()
-            self._save_data(data)
-            best_score = data["best_score"]
-
-        return BestScore.from_dict(best_score)
+        """최고점수 조회"""
+        return self.game_state.best_score
 
     def save_best_score(self, best_score: BestScore) -> None:
         """최고점수 갱신"""
-        data = self._load_data()
-        data["best_score"] = best_score.to_dict()
-        self._save_data(data)
+        self.game_state.best_score = best_score

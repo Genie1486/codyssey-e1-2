@@ -1,11 +1,13 @@
 from view import InputView, OutputView
 from service.quiz_service import QuizService
 from model.quiz import Quiz
-from common.enums.menu import Menu
+from common.enums import Menu, ResultType
 from common.constants.error_message import QuizMessage
 
 
 class QuizGame:
+    _has_existing_data = False
+
     def __init__(
         self, quiz_service: QuizService, input_view: InputView, output_view: OutputView
     ):
@@ -14,6 +16,24 @@ class QuizGame:
         self.output_view = output_view
 
     def run(self):
+        self._initialize_game()
+        self._play_game()
+
+    def _initialize_game(self):
+        """저장된 데이터로 게임 초기화"""
+        success, result = self.quiz_service.load_game_state()
+
+        if success:
+            self._has_existing_data = True
+
+        self.output_view.display_message(result.get_message())
+
+    def finalize_game(self):
+        """게임 종료 시 데이터 저장"""
+        success, result = self.quiz_service.save_game_state()
+        self.output_view.display_message(result.get_message())
+
+    def _play_game(self):
         while True:
             self._show_menu()  # 이미 만들어둔 메서드 활용!
             choice = self._get_choice()
@@ -35,6 +55,14 @@ class QuizGame:
             self._show_best_score()
 
     def _show_menu(self) -> None:
+        self.output_view.display_header()
+        quiz_count, best_score = self.quiz_service.get_quiz_count_and_best_score()
+
+        if self._has_existing_data:
+            self.output_view.display_saved_data_loaded(quiz_count, best_score)
+        else:
+            self.output_view.display_basic_data_loaded(quiz_count, best_score)
+
         display_names = [menu.display_name for menu in Menu]
         self.output_view.display_menu(display_names)
 
@@ -43,15 +71,11 @@ class QuizGame:
         return self.input_view.get_menu_choice(min_val, max_val)
 
     def _show_quiz_list(self) -> None:
-        quizzes, message = self.quiz_service.get_all_quizzes()
-        if message:
-            self.output_view.display_message(message)
+        quizzes = self.quiz_service.get_all_quizzes()
         self.output_view.display_quiz_list(quizzes)
 
     def _show_best_score(self) -> None:
-        best_score, message = self.quiz_service.get_best_score()
-        if message:
-            self.output_view.display_message(message)
+        best_score = self.quiz_service.get_best_score()
         self.output_view.display_best_score(best_score)
 
     def _add_quiz(self) -> None:
@@ -67,10 +91,10 @@ class QuizGame:
         if is_success:
             self.output_view.display_add_quiz_success_result()
         else:
-            self.output_view.display_message(QuizMessage.ADD_FAILED.value)
+            self.output_view.display_message(QuizMessage.QUIZ_ADD_FAILED)
 
     def _play_quiz(self) -> None:
-        quizzes, _ = self.quiz_service.get_all_quizzes()
+        quizzes = self.quiz_service.get_all_quizzes()
 
         self.output_view.display_quiz_start(len(quizzes))
 

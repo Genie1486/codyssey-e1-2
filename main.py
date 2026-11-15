@@ -1,4 +1,4 @@
-from common.enums.error_type import ErrorType
+from common.enums.error_type import ResultType
 from controller.quiz_game import QuizGame
 from repository.quiz_repository import QuizRepository
 from service.quiz_service import QuizService
@@ -14,11 +14,14 @@ if __name__ == "__main__":
         game = QuizGame(quiz_service, input_view, output_view)
         game.run()
     except KeyboardInterrupt:
-        output_view.display_error(ErrorType.KEYBOARD_INTERRUPT)
+        # Ctrl+C로 종료
+        output_view.display_error(ResultType.KEYBOARD_INTERRUPT)
     except EOFError:
-        output_view.display_error(ErrorType.EOF_ERROR)
+        # Ctrl+Z로 인한 일시 중지 후 재개 시에도 정상 종료
+        output_view.display_error(ResultType.EOF_ERROR)
     except Exception as e:
         # ← 예상 못한 심각한 오류만 여기서 처리
-        output_view.display_error(ErrorType.UNEXPECTED_ERROR, str(e))
+        output_view.display_error(ResultType.UNEXPECTED_ERROR, str(e))
     finally:
+        game.finalize_game()  # 안전 저장
         output_view.display_exit()

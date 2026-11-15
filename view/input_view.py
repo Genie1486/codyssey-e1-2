@@ -43,8 +43,16 @@ class InputView:
         # 선택지 4개 입력
         choices = []
         for i in range(1, 5):
-            choice = self._get_user_input_until_valid(self.CHOICE_I.format(i))
-            choices.append(choice)
+            while True:
+                choice = self._get_user_input_until_valid(self.CHOICE_I.format(i))
+
+                if choice in choices:
+                    print(ErrorMessage.DUPLICATE_CHOICE)
+                    continue
+
+                choices.append(choice)
+                break
+
         quiz_dict["choices"] = choices
 
         # 정답 입력
@@ -52,8 +60,6 @@ class InputView:
 
         # 🆕 힌트 입력 (선택사항, 한 번만)
         quiz_dict["hint"] = input(self.HINT).strip()
-
-        print(quiz_dict)
 
         return quiz_dict
 

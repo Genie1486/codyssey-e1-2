@@ -3,6 +3,7 @@ class ErrorMessage:
     NUMBER_RANGE = "{}-{} 사이의 정수를 입력하세요."
     NOT_AN_INTEGER = "⚠️  정수 변환에 실패했습니다."
     OUT_OF_RANGE = "⚠️  범위에 맞지 않는 숫자입니다."
+    DUPLICATE_CHOICE = "⚠️  중복된 선택지입니다. 다시 입력해주세요."
 
 
 class QuizMessage:

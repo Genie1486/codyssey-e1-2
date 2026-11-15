@@ -1,4 +1,5 @@
-from common.enums.error_type import ErrorType
+from common.constants.output_message import OutputMessage
+from common.enums.error_type import ResultType
 from common.constants.menu_format import MenuFormat
 from model import Quiz, BestScore
 
@@ -14,22 +15,22 @@ class OutputView:
     INCORRECT = "❌ 오답입니다!"
     CORRECT_ANSWER = "정답: {answer}번"
     RESULT_SCORE_HEADER = "🏆 결과: {total}문제 중 {correct}문제 정답!"
-    RESULT_SCORE_BODY = (
-        "힌트 본 횟수: {hint_view_cnt}회 ({hint_view_cnt}*10 점 차감)\n총점: {score}점"
-    )
+    RESULT_SCORE_BODY = "힌트 본 횟수: {hint_view_cnt}회 ({hint_view_cnt}*10 점 차감)\n총점: {score:.1f}점"
     NEW_RECORD = "🎉 새로운 최고 점수입니다!"
     NO_QUIZ = "퀴즈가 없습니다."
     NO_BEST_SCORE = "아직 최고 점수가 없습니다."
-    BEST_SCORE = "🏆 최고 점수: {score}점 ({total}문제 중 {correct}문제 정답)"
+    BEST_SCORE = "🏆 최고 점수: {score:.1f}점 ({total}문제 중 {correct}문제 정답)"
     EXIT_MESSAGE = "프로그램을 종료합니다."
     HINT_NOTICE = "💡 이 문제는 힌트가 있습니다."
     HINT = "💡 힌트: {hint}"
     HINT_ALREADY_VIEWED = "이미 힌트를 봤습니다"
 
-    def display_menu(self, menus: list[str]) -> None:
+    def display_header(self) -> None:
         print(MenuFormat.DIVIDER_EQUAL)
         print(f"{MenuFormat.PADDING}{self.TITLE}")
         print(MenuFormat.DIVIDER_EQUAL)
+
+    def display_menu(self, menus: list[str]) -> None:
         for i, menu in enumerate(menus, start=1):
             print(f"{i}. {menu}")
         print(MenuFormat.DIVIDER_EQUAL)
@@ -83,6 +84,7 @@ class OutputView:
         print(MenuFormat.DIVIDER_EQUAL)
 
     def display_quiz(self, quiz: Quiz, quiz_number: int) -> None:
+        print(MenuFormat.NEWLINE)
         print(self.QUESTION_NUMBER.format(number=quiz_number))
         print(quiz.question)
         print(MenuFormat.NEWLINE)
@@ -144,7 +146,7 @@ class OutputView:
         """이미 힌트를 봤음을 표시"""
         print(self.HINT_ALREADY_VIEWED)
 
-    def display_error(self, error_type: ErrorType, detail: str = ""):
+    def display_error(self, error_type: ResultType, detail: str = "") -> None:
         """에러 메시지 출력"""
         message = error_type.get_message()
 
@@ -152,3 +154,19 @@ class OutputView:
 
         if detail:
             print(f"   상세: {detail}")
+
+    def display_saved_data_loaded(self, quiz_count, best_score) -> None:
+        print(
+            OutputMessage.SAVED_DATA_LOAD_MESSAGE.format(
+                quiz_count=quiz_count, best_score=best_score
+            )
+        )
+        print(MenuFormat.DIVIDER_EQUAL)
+
+    def display_basic_data_loaded(self, quiz_count, best_score) -> None:
+        print(
+            OutputMessage.DEFAULT_DATA_LOAD_MESSAGE.format(
+                quiz_count=quiz_count, best_score=best_score
+            )
+        )
+        print(MenuFormat.DIVIDER_EQUAL)

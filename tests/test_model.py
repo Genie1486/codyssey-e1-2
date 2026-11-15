@@ -27,7 +27,7 @@ class TestQuizModel(unittest.TestCase):
             choices=["보기1", "보기2", "보기3", "보기4"],
             answer=3,
         )
-        self.assertEqual(quiz.hint, "힌트가 등록되지 않았습니다.")
+        self.assertEqual(quiz.hint, "")
 
     def test_quiz_create_with_no_args_uses_all_defaults(self):
         """모든 속성을 입력하지 않아도 Quiz 객체가 올바르게 생성되는지 확인"""
@@ -35,7 +35,7 @@ class TestQuizModel(unittest.TestCase):
         self.assertEqual(quiz.question, "")
         self.assertEqual(len(quiz.choices), 0)
         self.assertEqual(quiz.answer, 0)
-        self.assertEqual(quiz.hint, "힌트가 등록되지 않았습니다.")
+        self.assertEqual(quiz.hint, "")
 
     def test_check_answer_correct(self):
         """check_answer 메서드 동작확인: 정답일 때"""

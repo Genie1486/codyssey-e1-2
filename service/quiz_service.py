@@ -1,87 +1,95 @@
-from typing import TypeVar
+from model.game_state import GameState
 from repository.quiz_repository import QuizRepository
 from model import Quiz, BestScore
-from data.default_quizzes import load_default_quizzes
-from common.exceptions.repository_exceptions import (
-    QuizFileNotFoundError,
-    QuizFileCorruptedError,
-    QuizFileIOError,
-)
-from common.constants.error_message import QuizMessage
-import random
+from common.enums.error_type import ResultType
 
-T = TypeVar("T")
+import random
+import json
+import time
 
 
 class QuizService:
     HINT_PENALTY = 10  # 힌트당 10점 차감
+    MAX_IO_RETRIES = 3
 
     def __init__(self, repository: QuizRepository) -> None:
         self.repository = repository
-        # 속성으로 기본 데이터 저장
-        self.default_quizzes = load_default_quizzes()
-        self.default_best_score = BestScore(0, 0, 0)
 
-        self._initialize_data()
-
-    def _initialize_data(self) -> None:
-        """앱 시작 시 한 번만 실행"""
+    def load_game_state(self) -> tuple[bool, ResultType]:
+        """Repository의 load_game_state 호출"""
         try:
-            quizzes = self.repository.get_all_quizzes()
-            if not quizzes:
-                self._save_default_data()
-        except (QuizFileNotFoundError, QuizFileCorruptedError):
-            self._save_default_data()
+            data = self.repository.load_data()
+            game_state = GameState.from_dict(data)
 
-    def _save_default_data(self) -> None:
-        """기본 데이터를 DB에 저장 (저장만 담당)"""
-        self.repository.save_quizzes(self.default_quizzes)
-        self.repository.save_best_score(self.default_best_score)
+            if len(game_state.quizzes) == 0:
+                game_state.quizzes = self.repository.get_default_game_state().quizzes
+                return False, ResultType.DATA_LOAD_COMPLETE
 
-    def _handle_file_error(self, error: Exception, default_value: T) -> tuple[T, str]:
-        """파일 에러 처리 + 기본값 복구"""
-        self._save_default_data()
+            self.repository.set_game_state(game_state)
 
-        error_messages = {
-            QuizFileNotFoundError: QuizMessage.FILE_NOT_FOUND.value,
-            QuizFileCorruptedError: QuizMessage.FILE_CORRUPTED.value,
-            QuizFileIOError: QuizMessage.FILE_IO_ERROR.value,
-        }
+            return True, ResultType.DATA_LOAD_COMPLETE
 
-        return default_value, error_messages.get(type(error), "Unknown error")
+        except FileNotFoundError as e:
+            self._initialize_with_default_game_state()
+            return False, ResultType.FILE_NOT_FOUND
+        except json.JSONDecodeError as e:
+            self._initialize_with_default_game_state()
+            return False, ResultType.FILE_CORRUPTED
+        except IOError as e:
+            # IOError 발생 시 최대 3번 재시도
+            return self._retry_on_io_error(
+                self.repository.load_data, ResultType.DATA_LOAD_COMPLETE
+            )
 
-    def get_all_quizzes(self) -> tuple[list[Quiz], str | None]:
+    def save_game_state(self) -> tuple[bool, ResultType]:
+        try:
+            self.repository.save_data()
+            return True, ResultType.DATA_SAVE_COMPLETE
+        # 파일 쓰기 작업이라 FileNotFoundError, json.JSONDecodeError 발생 안함
+        except IOError:
+            return self._retry_on_io_error(
+                self.repository.save_data, ResultType.DATA_SAVE_COMPLETE
+            )
+
+    def _retry_on_io_error(
+        self, operation, success_result: ResultType
+    ) -> tuple[bool, ResultType]:
+        for attempt in range(1, self.MAX_IO_RETRIES + 1):
+            try:
+                print(f"재시도 {attempt}/{self.MAX_IO_RETRIES}...")
+                operation()
+                return True, success_result  # ✅ 호출부에서 결정
+            except IOError:
+                if attempt == self.MAX_IO_RETRIES:
+                    return False, ResultType.FILE_IO_ERROR
+                time.sleep(0.5)
+
+        return False, ResultType.FILE_IO_ERROR
+
+    def _initialize_with_default_game_state(self):
+        """Repository의 get_default_game_state 호출"""
+        game_state = self.repository.get_default_game_state()
+        self.repository.set_game_state(game_state)
+
+    def get_quiz_count_and_best_score(self) -> tuple[int, float]:
+        quizzes = self.repository.get_all_quizzes()
+        best_score = self.repository.get_best_score()
+
+        return len(quizzes), best_score.score
+
+    def get_all_quizzes(self) -> list[Quiz]:
         """모든 퀴즈 조회"""
-        try:
-            quizzes = self.repository.get_all_quizzes()
-            if not quizzes:
-                self._save_default_data()
-                return self.default_quizzes, None
-            return quizzes, None
-        except (QuizFileNotFoundError, QuizFileCorruptedError, QuizFileIOError) as e:
-            return self._handle_file_error(e, self.default_quizzes)
+        return self.repository.get_all_quizzes()
 
-    def get_best_score(self) -> tuple[BestScore | None, str | None]:
+    def get_best_score(self) -> BestScore:
         """최고 점수 조회"""
-        try:
-            best_score = self.repository.get_best_score()
-            if best_score.total == 0:
-                return None, None
-            return best_score, None
-        except (QuizFileNotFoundError, QuizFileCorruptedError, QuizFileIOError) as e:
-            return self._handle_file_error(e, self.default_best_score)
+        return self.repository.get_best_score()
 
     def add_quiz(self, quiz_data: dict) -> bool:
-        """
-        반환값: True (성공), False (실패)
-        에러메시지는 OutputView에서 처리
-        """
-        try:
-            quiz = Quiz.from_dict(quiz_data)
-            self.repository.save_quiz(quiz)
-            return True
-        except (QuizFileNotFoundError, QuizFileCorruptedError, QuizFileIOError) as e:
-            return False
+        """사용자가 입력한 퀴즈 1개 추가"""
+        quiz = Quiz.from_dict(quiz_data)
+        self.repository.save_quiz(quiz)
+        return True
 
     def is_correct(self, quiz: Quiz, user_answer: int) -> bool:
         """사용자 답이 정답인지 확인"""
