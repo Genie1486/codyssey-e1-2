@@ -1,4 +1,5 @@
-from constants.menu_format import MenuFormat
+from common.enums.error_type import ErrorType
+from common.constants.menu_format import MenuFormat
 from model import Quiz, BestScore
 
 
@@ -26,32 +27,32 @@ class OutputView:
     HINT_ALREADY_VIEWED = "이미 힌트를 봤습니다"
 
     def display_menu(self, menus: list[str]) -> None:
-        print(MenuFormat.DIVIDER_EQUAL.value)
-        print(f"{MenuFormat.PADDING.value}{self.TITLE}")
-        print(MenuFormat.DIVIDER_EQUAL.value)
+        print(MenuFormat.DIVIDER_EQUAL)
+        print(f"{MenuFormat.PADDING}{self.TITLE}")
+        print(MenuFormat.DIVIDER_EQUAL)
         for i, menu in enumerate(menus, start=1):
             print(f"{i}. {menu}")
-        print(MenuFormat.DIVIDER_EQUAL.value)
+        print(MenuFormat.DIVIDER_EQUAL)
 
     def display_exit(self) -> None:
         print(self.EXIT_MESSAGE)
 
     def display_quiz_list(self, quizzes: list[Quiz]) -> None:  # 목록 출력
-        print(MenuFormat.NEWLINE.value)
+        print(MenuFormat.NEWLINE)
         title = self.QUIZ_LIST.format(len(quizzes))
-        print(f"{MenuFormat.PADDING.value}{title}")
-        print(MenuFormat.DIVIDER_DASH.value)
+        print(f"{MenuFormat.PADDING}{title}")
+        print(MenuFormat.DIVIDER_DASH)
         for i, quiz in enumerate(quizzes, start=1):
             print(f"[{i}] {quiz.question}")
-        print(MenuFormat.DIVIDER_DASH.value)
-        print(MenuFormat.NEWLINE.value)
+        print(MenuFormat.DIVIDER_DASH)
+        print(MenuFormat.NEWLINE)
 
     def display_message(self, message: str) -> None:
         print(message)
 
     def display_best_score(self, best_score: BestScore) -> None:
         # 🏆 최고 점수: 80점 (5문제 중 4문제 정답)
-        print(MenuFormat.NEWLINE.value)
+        print(MenuFormat.NEWLINE)
         if best_score is None:
             print(self.NO_BEST_SCORE)
         else:
@@ -62,59 +63,59 @@ class OutputView:
                     correct=best_score.correct,
                 )
             )
-        print(MenuFormat.NEWLINE.value)
+        print(MenuFormat.NEWLINE)
 
     def display_add_quiz_success_result(self) -> None:
-        print(MenuFormat.NEWLINE.value)
+        print(MenuFormat.NEWLINE)
         print(self.ADD_QUIZ_COMPLETE_MESSAGE)
-        print(MenuFormat.NEWLINE.value)
+        print(MenuFormat.NEWLINE)
 
     def display_add_quiz_start(self) -> None:
-        print(MenuFormat.NEWLINE.value)
+        print(MenuFormat.NEWLINE)
         print(self.ADD_QUIZ)
-        print(MenuFormat.NEWLINE.value)
+        print(MenuFormat.NEWLINE)
 
     def display_quiz_start(self, total_quiz_count: int) -> None:
-        print(MenuFormat.NEWLINE.value)
+        print(MenuFormat.NEWLINE)
         print(self.QUIZ_START.format(total=total_quiz_count))
-        print(MenuFormat.NEWLINE.value)
-        print(MenuFormat.NEWLINE.value)
-        print(MenuFormat.DIVIDER_EQUAL.value)
+        print(MenuFormat.NEWLINE)
+        print(MenuFormat.NEWLINE)
+        print(MenuFormat.DIVIDER_EQUAL)
 
     def display_quiz(self, quiz: Quiz, quiz_number: int) -> None:
         print(self.QUESTION_NUMBER.format(number=quiz_number))
         print(quiz.question)
-        print(MenuFormat.NEWLINE.value)
+        print(MenuFormat.NEWLINE)
 
         for i, choice in enumerate(quiz.choices, start=1):
             print(f"{i}. {choice}")
 
-        print(MenuFormat.NEWLINE.value)
+        print(MenuFormat.NEWLINE)
         if quiz.has_hint():
             print(self.HINT_NOTICE)
 
     def display_no_quiz(self) -> None:
         print(self.NO_QUIZ)
-        print(MenuFormat.NEWLINE.value)
-        print(MenuFormat.NEWLINE.value)
-        print(MenuFormat.DIVIDER_DASH.value)
+        print(MenuFormat.NEWLINE)
+        print(MenuFormat.NEWLINE)
+        print(MenuFormat.DIVIDER_DASH)
 
     def display_correct(self) -> None:
         print(self.CORRECT)
-        print(MenuFormat.NEWLINE.value)
-        print(MenuFormat.NEWLINE.value)
-        print(MenuFormat.DIVIDER_DASH.value)
+        print(MenuFormat.NEWLINE)
+        print(MenuFormat.NEWLINE)
+        print(MenuFormat.DIVIDER_DASH)
 
     def display_incorrect(self, correct_answer: int) -> None:
         print(self.INCORRECT)
         print(self.CORRECT_ANSWER.format(answer=correct_answer))
-        print(MenuFormat.NEWLINE.value)
-        print(MenuFormat.NEWLINE.value)
-        print(MenuFormat.DIVIDER_DASH.value)
+        print(MenuFormat.NEWLINE)
+        print(MenuFormat.NEWLINE)
+        print(MenuFormat.DIVIDER_DASH)
 
     def display_quiz_result(self, user_score: dict, is_new_record: bool) -> None:
 
-        print(MenuFormat.DIVIDER_EQUAL.value)
+        print(MenuFormat.DIVIDER_EQUAL)
 
         print(
             self.RESULT_SCORE_HEADER.format(
@@ -130,15 +131,24 @@ class OutputView:
 
         if is_new_record:
             print(self.NEW_RECORD)
-        print(MenuFormat.DIVIDER_EQUAL.value)
-        print(MenuFormat.NEWLINE.value)
-        print(MenuFormat.NEWLINE.value)
+        print(MenuFormat.DIVIDER_EQUAL)
+        print(MenuFormat.NEWLINE)
+        print(MenuFormat.NEWLINE)
 
     def display_hint(self, hint: str) -> None:
         """힌트 표시"""
-        print(MenuFormat.NEWLINE.value)
+        print(MenuFormat.NEWLINE)
         print(self.HINT.format(hint=hint))
 
     def display_hint_aleady_viewed(self) -> None:
         """이미 힌트를 봤음을 표시"""
         print(self.HINT_ALREADY_VIEWED)
+
+    def display_error(self, error_type: ErrorType, detail: str = ""):
+        """에러 메시지 출력"""
+        message = error_type.get_message()
+
+        print(f"\n\n{message}")
+
+        if detail:
+            print(f"   상세: {detail}")

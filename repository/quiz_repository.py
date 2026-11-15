@@ -1,21 +1,88 @@
 import json
 from model import Quiz, BestScore
-from exceptions.repository_exceptions import (
+from common.exceptions.repository_exceptions import (
     QuizFileNotFoundError,
     QuizFileCorruptedError,
     QuizFileIOError,
 )
+from pathlib import Path
 
 
 class QuizRepository:
-    # 파일 손상 시 복구용 기본값
-    # total == 0은 "아직 풀지 않은 상태"를 의미
+    DEFAULT_QUIZZES = [
+        Quiz(
+            question="The manager requested that all employees _______ the mandatory training session next Monday.",
+            choices=["attend", "attends", "attended", "will attend"],
+            answer=1,
+            hint="request, suggest, insist, recommend 등의 동사 뒤에 오는 that절에서는 동사원형을 써요! (가정법 현재 / 당위성의 should 생략)",
+        ),
+        Quiz(
+            question="The new policy will be implemented _______ all departments have reviewed and approved the proposal.",
+            choices=["despite", "once", "although", "so that"],
+            answer=2,
+            hint="빈칸 앞뒤 문맥을 살펴보세요. '~하고 나면 / ~하자마자' 라는 시간의 접속사가 필요해요!",
+        ),
+        Quiz(
+            question="The report _______ by the research team was presented to the board of directors yesterday.",
+            choices=["compile", "compiling", "compiled", "to compile"],
+            answer=3,
+            hint="명사(report)를 뒤에서 꾸며주는 분사를 골라야 해요. report와 compile의 관계가 능동인지 수동인지 생각해보세요!",
+        ),
+        Quiz(
+            question="She finished the project _______ than anyone had expected.",
+            choices=["more quickly", "most quickly", "much quickly", "as quickly"],
+            answer=1,
+            hint="than이 있으면 비교급이 필요해요! quickly는 부사라서 more를 붙여 비교급을 만들어요 😊",
+        ),
+        Quiz(
+            question="Please submit your application form _______ the deadline on Friday.",
+            choices=["until", "during", "by", "for"],
+            answer=3,
+            hint="마감 기한을 나타낼 때 쓰는 전치사를 고르세요! '~까지 (완료)'의 의미예요.",
+        ),
+    ]
+
     DEFAULT_BEST_SCORE = {"score": 0, "correct": 0, "total": 0}
 
-    def __init__(self, file_path: str) -> None:  # 주입!
-        self.file_path = file_path
+    def __init__(self, file_path: Path = None) -> None:  # 주입!
+        if file_path is None:
+            # Path(__file__) = 현재 파일 경로
+            # .parent = repository/
+            # .parent = 프로젝트 루트
+            file_path = Path(__file__).parent.parent / "state.json"
 
-    # ===== 헬퍼 메서드 (중복 제거) =====
+        self.file_path = file_path
+        data = self._load_data()
+
+        self._quizzes = list(map(lambda x: Quiz.from_dict(x), data.get("quizzes", [])))
+
+        if len(self._quizzes) == 0:
+            self._quizzes = self.DEFAULT_QUIZZES.copy()
+
+        self._best_score = BestScore.from_dict(
+            data.get("best_score", self.DEFAULT_BEST_SCORE)
+        )
+
+    def _load_data(self) -> dict:
+        """파일에서 JSON 데이터 로드"""
+        try:
+            with open(self.file_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except FileNotFoundError as e:
+            self._initialize_file()
+            raise QuizFileNotFoundError(
+                f"파일을 찾을 수 없습니다: {self.file_path}"
+            ) from e
+        except json.JSONDecodeError as e:
+            self._initialize_file()
+            raise QuizFileCorruptedError(
+                f"JSON 파일이 손상되었습니다: {self.file_path}"
+            ) from e
+        except IOError as e:
+            raise QuizFileIOError(f"파일 읽기 중 오류 발생: {str(e)}") from e
+
+    def _get_defaults(self):
+        return self.DEFAULT_QUIZZES.copy(), self.DEFAULT_BEST_SCORE.copy()
 
     def _initialize_file(self) -> dict:
         """파일 없을 때 초기 state.json 생성"""

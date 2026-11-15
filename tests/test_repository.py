@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from exceptions.repository_exceptions import (
+from common.exceptions.repository_exceptions import (
     QuizFileCorruptedError,
     QuizFileIOError,
     QuizFileNotFoundError,

@@ -2,12 +2,12 @@ from typing import TypeVar
 from repository.quiz_repository import QuizRepository
 from model import Quiz, BestScore
 from data.default_quizzes import load_default_quizzes
-from exceptions.repository_exceptions import (
+from common.exceptions.repository_exceptions import (
     QuizFileNotFoundError,
     QuizFileCorruptedError,
     QuizFileIOError,
 )
-from constants.error_message import QuizMessage
+from common.constants.error_message import QuizMessage
 import random
 
 T = TypeVar("T")
@@ -16,9 +16,8 @@ T = TypeVar("T")
 class QuizService:
     HINT_PENALTY = 10  # 힌트당 10점 차감
 
-    def __init__(self, file_path: str) -> None:
-        self.repository = QuizRepository(file_path)
-
+    def __init__(self, repository: QuizRepository) -> None:
+        self.repository = repository
         # 속성으로 기본 데이터 저장
         self.default_quizzes = load_default_quizzes()
         self.default_best_score = BestScore(0, 0, 0)

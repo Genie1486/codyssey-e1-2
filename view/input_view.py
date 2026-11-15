@@ -1,4 +1,4 @@
-from constants.error_message import ErrorMessage
+from common.constants.error_message import ErrorMessage
 
 
 class InputView:
@@ -86,7 +86,7 @@ class InputView:
         # 빈값 검증
         if len(validated_number) == 0:
             print(
-                f"{ErrorMessage.EMPTY_INPUT.value} {ErrorMessage.NUMBER_RANGE.value.format(min_val,max_val)}"
+                f"{ErrorMessage.EMPTY_INPUT} {ErrorMessage.NUMBER_RANGE.format(min_val,max_val)}"
             )
             return None
 
@@ -95,14 +95,14 @@ class InputView:
             validated_number = int(validated_number)
         except ValueError:
             print(
-                f"{ErrorMessage.NOT_AN_INTEGER.value} {ErrorMessage.NUMBER_RANGE.value.format(min_val,max_val)}"
+                f"{ErrorMessage.NOT_AN_INTEGER} {ErrorMessage.NUMBER_RANGE.format(min_val,max_val)}"
             )
             return None
 
         # 범위 검증 (동적 메시지!)
         if not (min_val <= validated_number <= max_val):
             print(
-                f"{ErrorMessage.OUT_OF_RANGE.value} {ErrorMessage.NUMBER_RANGE.value.format(min_val,max_val)}"
+                f"{ErrorMessage.OUT_OF_RANGE} {ErrorMessage.NUMBER_RANGE.format(min_val,max_val)}"
             )
             return None
 
@@ -113,7 +113,7 @@ class InputView:
         validated_text = user_input.strip()
 
         if len(validated_text) == 0:
-            print(ErrorMessage.EMPTY_INPUT.value)
+            print(ErrorMessage.EMPTY_INPUT)
             return None
 
         return validated_text

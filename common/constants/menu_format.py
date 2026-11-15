@@ -1,7 +1,4 @@
-from enum import Enum
-
-
-class MenuFormat(Enum):
+class MenuFormat:
     PADDING = "        "  # 가운데 정렬용 공백
     SEPARATOR = " | "
     DIVIDER_EQUAL = "=" * 40

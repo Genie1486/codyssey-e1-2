@@ -1,8 +1,8 @@
 from view import InputView, OutputView
 from service.quiz_service import QuizService
 from model.quiz import Quiz
-from constants.menu import Menu
-from constants.error_message import QuizMessage
+from common.enums.menu import Menu
+from common.constants.error_message import QuizMessage
 
 
 class QuizGame:
@@ -15,26 +15,26 @@ class QuizGame:
 
     def run(self):
         while True:
-            self.show_menu()  # 이미 만들어둔 메서드 활용!
+            self._show_menu()  # 이미 만들어둔 메서드 활용!
             choice = self._get_choice()
 
             if choice == Menu.EXIT.number:
-                self.output_view.display_exit()
+                # main.py에서 finally에서 종료메시지 출력
                 break
 
             self._handle_menu(choice)
 
     def _handle_menu(self, choice: int):
         if choice == Menu.PLAY.number:
-            self.play_quiz()
+            self._play_quiz()
         elif choice == Menu.ADD.number:
-            self.add_quiz()
+            self._add_quiz()
         elif choice == Menu.LIST.number:
-            self.show_quiz_list()
+            self._show_quiz_list()
         elif choice == Menu.SCORE.number:
-            self.show_best_score()
+            self._show_best_score()
 
-    def show_menu(self) -> None:
+    def _show_menu(self) -> None:
         display_names = [menu.display_name for menu in Menu]
         self.output_view.display_menu(display_names)
 
@@ -42,19 +42,19 @@ class QuizGame:
         min_val, max_val = Menu.number_range()
         return self.input_view.get_menu_choice(min_val, max_val)
 
-    def show_quiz_list(self) -> None:
+    def _show_quiz_list(self) -> None:
         quizzes, message = self.quiz_service.get_all_quizzes()
         if message:
             self.output_view.display_message(message)
         self.output_view.display_quiz_list(quizzes)
 
-    def show_best_score(self) -> None:
+    def _show_best_score(self) -> None:
         best_score, message = self.quiz_service.get_best_score()
         if message:
             self.output_view.display_message(message)
         self.output_view.display_best_score(best_score)
 
-    def add_quiz(self) -> None:
+    def _add_quiz(self) -> None:
         # 1. 시작 메시지
         self.output_view.display_add_quiz_start()
 
@@ -69,7 +69,7 @@ class QuizGame:
         else:
             self.output_view.display_message(QuizMessage.ADD_FAILED.value)
 
-    def play_quiz(self) -> None:
+    def _play_quiz(self) -> None:
         quizzes, _ = self.quiz_service.get_all_quizzes()
 
         self.output_view.display_quiz_start(len(quizzes))
@@ -89,8 +89,6 @@ class QuizGame:
         self._display_and_save_result(
             user_correct, len(selected_quizzes), hint_view_cnt
         )
-
-    # ===== 헬퍼메서드 =====
 
     def _play_all_quizzes(self, quizzes):
         """모든 퀴즈 풀기"""
