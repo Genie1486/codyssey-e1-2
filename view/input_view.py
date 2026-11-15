@@ -10,6 +10,8 @@ class InputView:
     INPUT_ANSWER = "정답 입력 (1~4):  "
     INPUT_ANSWER_WITH_HINT = "정답 입력 (1~4, 힌트는 0): "
     QUIZ_COUNT = "몇 문제를 푸시겠습니까? ({min_val}~{max_val} 숫자 입력): "
+    DELETE_QUIZ_NUMBER = "삭제할 퀴즈 번호를 입력하세요: "
+    DELETE_QUIZ_CONFIRM = "정말 삭제하시겠습니까? (y/n): "
 
     def get_number_in_range(self, prompt: str, min_val: int, max_val: int) -> int:
         """범위 내의 정수를 입력받음"""
@@ -32,6 +34,21 @@ class InputView:
         return self.get_number_in_range(
             self.QUIZ_COUNT.format(min_val=min_val, max_val=max_val), min_val, max_val
         )
+
+    def get_delete_quiz_num(self, min_val: int, max_val: int) -> int:
+        "삭제할 번호 입력"
+        return self.get_number_in_range(self.DELETE_QUIZ_NUMBER, min_val, max_val)
+
+    def get_delete_confirm(self):
+        while True:
+            yes_or_no = self._get_user_input_until_valid(
+                self.DELETE_QUIZ_CONFIRM
+            ).lower()
+
+            if yes_or_no.lower() in ["y", "n"]:
+                return yes_or_no
+
+            print(ErrorMessage.INVALID_CONFIRM_INPUT)
 
     def get_quiz_input(self):
         """새로운 퀴즈 입력받기"""

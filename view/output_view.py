@@ -9,6 +9,10 @@ class OutputView:
     QUIZ_LIST = "📋 등록된 퀴즈 목록 (총 {}개)"
     ADD_QUIZ = "📌 새로운 퀴즈를 추가합니다."
     ADD_QUIZ_COMPLETE_MESSAGE = "✅ 퀴즈가 추가되었습니다!"
+    DELETE_QUIZ = "📋 퀴즈 삭제"
+    DELETE_QUIZ_COMPLETE = "\n✅ 퀴즈가 삭제되었습니다!"
+    DELETE_QUIZ_FAILED = "❌ 퀴즈 삭제에 실패했습니다."
+    DELETE_QUIZ_FORMAT = "🗑️  [{number}] {question}"
     QUIZ_START = "📝 퀴즈를 시작합니다! (총 {total}문제)"
     QUESTION_NUMBER = "[문제 {number}]"
     CORRECT = "✅ 정답입니다!"
@@ -17,7 +21,7 @@ class OutputView:
     RESULT_SCORE_HEADER = "🏆 결과: {total}문제 중 {correct}문제 정답!"
     RESULT_SCORE_BODY = "힌트 본 횟수: {hint_view_cnt}회 ({hint_view_cnt}*10 점 차감)\n총점: {score:.1f}점"
     NEW_RECORD = "🎉 새로운 최고 점수입니다!"
-    NO_QUIZ = "퀴즈가 없습니다."
+    NO_QUIZ = "등록된 퀴즈가 없습니다."
     NO_BEST_SCORE = "아직 최고 점수가 없습니다."
     BEST_SCORE = "🏆 최고 점수: {score:.1f}점 ({total}문제 중 {correct}문제 정답)"
     EXIT_MESSAGE = "프로그램을 종료합니다."
@@ -26,6 +30,7 @@ class OutputView:
     HINT_ALREADY_VIEWED = "이미 힌트를 봤습니다"
 
     def display_header(self) -> None:
+        print(MenuFormat.NEWLINE)
         print(MenuFormat.DIVIDER_EQUAL)
         print(f"{MenuFormat.PADDING}{self.TITLE}")
         print(MenuFormat.DIVIDER_EQUAL)
@@ -38,11 +43,26 @@ class OutputView:
     def display_exit(self) -> None:
         print(self.EXIT_MESSAGE)
 
-    def display_quiz_list(self, quizzes: list[Quiz]) -> None:  # 목록 출력
+    def display_quiz_list(
+        self, quizzes: list[Quiz], header: str = None
+    ) -> None:  # 목록 출력
         print(MenuFormat.NEWLINE)
-        title = self.QUIZ_LIST.format(len(quizzes))
-        print(f"{MenuFormat.PADDING}{title}")
+
+        if header is None:
+            header = self.QUIZ_LIST.format(len(quizzes))
+
+        print(header)
+
+        print(MenuFormat.NEWLINE)
+
+        if len(quizzes) == 0:
+            print(MenuFormat.DIVIDER_DASH)
+            print(self.NO_QUIZ)
+            print(MenuFormat.DIVIDER_DASH)
+            return
+
         print(MenuFormat.DIVIDER_DASH)
+
         for i, quiz in enumerate(quizzes, start=1):
             print(f"[{i}] {quiz.question}")
         print(MenuFormat.DIVIDER_DASH)
@@ -81,6 +101,7 @@ class OutputView:
         print(self.QUIZ_START.format(total=total_quiz_count))
         print(MenuFormat.NEWLINE)
         print(MenuFormat.NEWLINE)
+
         print(MenuFormat.DIVIDER_EQUAL)
 
     def display_quiz(self, quiz: Quiz, quiz_number: int) -> None:
@@ -97,9 +118,8 @@ class OutputView:
             print(self.HINT_NOTICE)
 
     def display_no_quiz(self) -> None:
+        print(MenuFormat.DIVIDER_DASH)
         print(self.NO_QUIZ)
-        print(MenuFormat.NEWLINE)
-        print(MenuFormat.NEWLINE)
         print(MenuFormat.DIVIDER_DASH)
 
     def display_correct(self) -> None:

@@ -4,6 +4,7 @@ class ErrorMessage:
     NOT_AN_INTEGER = "⚠️  정수 변환에 실패했습니다."
     OUT_OF_RANGE = "⚠️  범위에 맞지 않는 숫자입니다."
     DUPLICATE_CHOICE = "⚠️  중복된 선택지입니다. 다시 입력해주세요."
+    INVALID_CONFIRM_INPUT = "⚠️  y/n 만 입력해주세요."
 
 
 class QuizMessage:

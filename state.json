@@ -1,6 +1,7 @@
 {
     "quizzes": [
         {
+            "id": 1,
             "question": "The manager requested that all employees _______ the mandatory training session next Monday.",
             "choices": [
                 "attend",
@@ -12,6 +13,7 @@
             "hint": "request, suggest, insist, recommend 등의 동사 뒤에 오는 that절에서는 동사원형을 써요! (가정법 현재 / 당위성의 should 생략)"
         },
         {
+            "id": 2,
             "question": "The new policy will be implemented _______ all departments have reviewed and approved the proposal.",
             "choices": [
                 "despite",
@@ -23,6 +25,7 @@
             "hint": "빈칸 앞뒤 문맥을 살펴보세요. '~하고 나면 / ~하자마자' 라는 시간의 접속사가 필요해요!"
         },
         {
+            "id": 3,
             "question": "The report _______ by the research team was presented to the board of directors yesterday.",
             "choices": [
                 "compile",
@@ -34,6 +37,7 @@
             "hint": "명사(report)를 뒤에서 꾸며주는 분사를 골라야 해요. report와 compile의 관계가 능동인지 수동인지 생각해보세요!"
         },
         {
+            "id": 4,
             "question": "She finished the project _______ than anyone had expected.",
             "choices": [
                 "more quickly",
@@ -45,6 +49,7 @@
             "hint": "than이 있으면 비교급이 필요해요! quickly는 부사라서 more를 붙여 비교급을 만들어요 😊"
         },
         {
+            "id": 5,
             "question": "Please submit your application form _______ the deadline on Friday.",
             "choices": [
                 "until",
@@ -54,22 +59,11 @@
             ],
             "answer": 3,
             "hint": "마감 기한을 나타낼 때 쓰는 전치사를 고르세요! '~까지 (완료)'의 의미예요."
-        },
-        {
-            "question": "ㄴㅁ",
-            "choices": [
-                "1",
-                "2",
-                "3",
-                "4"
-            ],
-            "answer": 1,
-            "hint": "ㅁㄴㄹ"
         }
     ],
     "best_score": {
-        "score": 53.33,
-        "correct": 5,
-        "total": 6
+        "score": 0,
+        "correct": 0,
+        "total": 0
     }
 }

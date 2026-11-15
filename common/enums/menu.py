@@ -10,9 +10,10 @@ class MenuInfo:
 class Menu(Enum):
     PLAY = MenuInfo(1, "퀴즈 풀기")
     ADD = MenuInfo(2, "퀴즈 추가")
-    LIST = MenuInfo(3, "퀴즈 목록")
-    SCORE = MenuInfo(4, "점수 확인")
-    EXIT = MenuInfo(5, "종료")
+    DELETE = MenuInfo(3, "퀴즈 삭제")
+    LIST = MenuInfo(4, "퀴즈 목록")
+    SCORE = MenuInfo(5, "점수 확인")
+    EXIT = MenuInfo(6, "종료")
 
     @property
     def number(self):

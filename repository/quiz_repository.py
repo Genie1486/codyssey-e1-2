@@ -59,6 +59,13 @@ class QuizRepository:
         return data
 
     def set_game_state(self, game_state: GameState) -> None:
+        next_id = self._get_next_quiz_id(game_state.quizzes)
+
+        for quiz in game_state.quizzes:
+            if quiz.id is None:
+                quiz.id = next_id
+                next_id += 1
+
         self.game_state = game_state
 
     def get_default_game_state(self) -> GameState:
@@ -84,14 +91,43 @@ class QuizRepository:
 
     def save_quiz(self, quiz: Quiz) -> None:
         """퀴즈 추가"""
+        quiz.id = self._get_next_quiz_id(self.game_state.quizzes)
         self.game_state.quizzes.append(quiz)
 
     def save_quizzes(self, quizzes: list[Quiz]) -> None:
         """여러 퀴즈 일괄 저장"""
+        next_id = self._get_next_quiz_id(self.game_state.quizzes)
+
+        for quiz in quizzes:
+            quiz.id = next_id
+            next_id += 1
+
         self.game_state.quizzes.extend(quizzes)
 
-    def delete_quiz(self, quiz_id):
+    def delete_quiz(self, quiz_id: int) -> bool:
         """퀴즈 삭제"""
+        quiz_to_delete = None
+        for quiz in self.game_state.quizzes:
+            if quiz.id == quiz_id:
+                quiz_to_delete = quiz
+                break
+
+        if quiz_to_delete is None:
+            return False
+
+        self.game_state.quizzes.remove(quiz_to_delete)
+
+        return True
+
+    def _get_next_quiz_id(self, quizzes: list[Quiz]) -> int:
+        """
+        기존 퀴즈들의 최대 id를 찾아
+        다음 id 반환
+        """
+        existing_ids = [
+            quiz.id for quiz in quizzes if hasattr(quiz, "id") and quiz.id is not None
+        ]
+        return max(existing_ids) + 1 if existing_ids else 1
 
     # ===== BestScore 관련  =====
     def get_best_score(self) -> BestScore:

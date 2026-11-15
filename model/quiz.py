@@ -1,11 +1,13 @@
 class Quiz:
     def __init__(self, **kwargs):
+        self.id = kwargs.get("id")
         self.question = kwargs.get("question", "")
         self.choices = kwargs.get("choices", [])
         self.answer = kwargs.get("answer", 0)
         self.hint = kwargs.get("hint", "")
 
     def info(self):
+        print(self.id)
         print(self.question)
         print(self.choices)
         print(self.answer)
@@ -28,6 +30,7 @@ class Quiz:
 
     def to_dict(self) -> dict:
         return {
+            "id": self.id,
             "question": self.question,
             "choices": self.choices,
             "answer": self.answer,

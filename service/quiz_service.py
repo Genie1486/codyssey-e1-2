@@ -23,6 +23,7 @@ class QuizService:
 
             if len(game_state.quizzes) == 0:
                 game_state.quizzes = self.repository.get_default_game_state().quizzes
+                self.repository.set_game_state(game_state)
                 return False, ResultType.DATA_LOAD_COMPLETE
 
             self.repository.set_game_state(game_state)
@@ -136,3 +137,6 @@ class QuizService:
         """개수 만큼 퀴즈 출제"""
         shuffled_quizzes = self.get_shuffled_quizzes(quizzes)
         return shuffled_quizzes[:count]
+
+    def remove_quiz(self, quiz: Quiz) -> bool:
+        return self.repository.delete_quiz(quiz.id)  # ← 검사 생략 가능

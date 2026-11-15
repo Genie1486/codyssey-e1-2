@@ -7,6 +7,7 @@ from common.constants.error_message import QuizMessage
 
 class QuizGame:
     _has_existing_data = False
+    _is_first_loading = True
 
     def __init__(
         self, quiz_service: QuizService, input_view: InputView, output_view: OutputView
@@ -53,15 +54,19 @@ class QuizGame:
             self._show_quiz_list()
         elif choice == Menu.SCORE.number:
             self._show_best_score()
+        elif choice == Menu.DELETE.number:
+            self._delete_quiz()
 
     def _show_menu(self) -> None:
         self.output_view.display_header()
         quiz_count, best_score = self.quiz_service.get_quiz_count_and_best_score()
 
-        if self._has_existing_data:
-            self.output_view.display_saved_data_loaded(quiz_count, best_score)
-        else:
-            self.output_view.display_basic_data_loaded(quiz_count, best_score)
+        if self._is_first_loading:
+            self._is_first_loading = False
+            if self._has_existing_data:
+                self.output_view.display_saved_data_loaded(quiz_count, best_score)
+            else:
+                self.output_view.display_basic_data_loaded(quiz_count, best_score)
 
         display_names = [menu.display_name for menu in Menu]
         self.output_view.display_menu(display_names)
@@ -173,3 +178,26 @@ class QuizGame:
         )
         is_update_best_score = self.quiz_service.update_best_score_if_needed(user_score)
         self.output_view.display_quiz_result(user_score, is_update_best_score)
+
+    def _delete_quiz(self):
+        quizzes = self.quiz_service.get_all_quizzes()
+        self.output_view.display_quiz_list(quizzes, OutputView.DELETE_QUIZ)
+
+        if len(quizzes) == 0:
+            return
+
+        delete_quiz_num = self.input_view.get_delete_quiz_num(1, len(quizzes))
+
+        self.output_view.display_message(
+            OutputView.DELETE_QUIZ_FORMAT.format(
+                number=delete_quiz_num, question=quizzes[delete_quiz_num - 1].question
+            )
+        )
+        yes_or_no = self.input_view.get_delete_confirm()
+
+        if yes_or_no == "y":
+            result = self.quiz_service.remove_quiz(quizzes[delete_quiz_num - 1])
+            if result:
+                self.output_view.display_message(OutputView.DELETE_QUIZ_COMPLETE)
+            else:
+                self.output_view.display_message(OutputView.DELETE_QUIZ_FAILED)
