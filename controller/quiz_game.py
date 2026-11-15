@@ -1,7 +1,12 @@
+from common.exceptions.repository_exceptions import (
+    QuizFileCorruptedError,
+    QuizFileIOError,
+    QuizFileNotFoundError,
+)
 from view import InputView, OutputView
 from service.quiz_service import QuizService
 from model.quiz import Quiz
-from common.enums.menu import Menu
+from common.enums import Menu, ErrorType
 from common.constants.error_message import QuizMessage
 
 
@@ -14,6 +19,42 @@ class QuizGame:
         self.output_view = output_view
 
     def run(self):
+        try:
+            self.has_existing_data = self.quiz_service.load_game_state()
+            self._play_game()
+            self._save_game_state()
+        except FileNotFoundError:
+            self.output_view.display_error(ErrorType.FILE_NOT_FOUND)
+            self._initialize_with_default()  # 기본 퀴즈 데이터 사용
+            self._play_game()
+            self._save_game_state()
+        except QuizFileCorruptedError:
+            self.output_view.display_error(ErrorType.FILE_CORRUPTED)
+            self._initialize_with_default()  # 기본 퀴즈 데이터 사용
+            self._play_game()
+            self._save_game_state()
+        except QuizFileIOError:
+            # 재시도 3번 그래도 실패하면 프로그램 종료
+            pass
+
+    def _initialize_game(self):
+        """저장된 데이터로 게임 초기화"""
+        success, message = self.quiz_service.load_game_state()
+        if success:
+            self.output_view.display_message(message)
+
+    def _initialize_with_default(self):
+        """기본 데이터로 게임 초기화"""
+        success, message = self.quiz_service.initialize_with_default_state()
+        self.output_view.display_message(message)
+
+    def _save_game_state(self):
+        """게임 상태 저장"""
+        success, message = self.quiz_service.save_game_state()
+        if success:
+            self.output_view.show_message(message)
+
+    def _play_game(self):
         while True:
             self._show_menu()  # 이미 만들어둔 메서드 활용!
             choice = self._get_choice()
@@ -35,6 +76,7 @@ class QuizGame:
             self._show_best_score()
 
     def _show_menu(self) -> None:
+        self.output_view.display_header()
         display_names = [menu.display_name for menu in Menu]
         self.output_view.display_menu(display_names)
 

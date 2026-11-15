@@ -3,6 +3,7 @@ from controller.quiz_game import QuizGame
 from repository.quiz_repository import QuizRepository
 from service.quiz_service import QuizService
 from view import InputView, OutputView
+import traceback
 
 if __name__ == "__main__":
     try:
@@ -19,6 +20,7 @@ if __name__ == "__main__":
         output_view.display_error(ErrorType.EOF_ERROR)
     except Exception as e:
         # ← 예상 못한 심각한 오류만 여기서 처리
+        traceback.print_exc()
         output_view.display_error(ErrorType.UNEXPECTED_ERROR, str(e))
     finally:
         output_view.display_exit()

@@ -11,6 +11,8 @@ class ErrorType(Enum):
 
     # 데이터 관련
     FILE_NOT_FOUND = "FILE_NOT_FOUND"
+    FILE_CORRUPTED = "FILE_CORRUPTED"  # ← 추가
+    FILE_IO_ERROR = "FILE_IO_ERROR"  # ← 추가
     INVALID_DATA = "INVALID_DATA"
 
     # 기타
@@ -22,6 +24,8 @@ class ErrorType(Enum):
             ErrorType.KEYBOARD_INTERRUPT: "사용자가 프로그램을 중단했습니다.",
             ErrorType.EOF_ERROR: "입력 스트림이 종료되었습니다.",
             ErrorType.FILE_NOT_FOUND: "필요한 파일을 찾을 수 없습니다.",
+            ErrorType.FILE_CORRUPTED: "파일이 손상되었습니다. 파일을 다시 확인해주세요.",
+            ErrorType.FILE_IO_ERROR: "파일 읽기/쓰기 중 오류가 발생했습니다.",
             ErrorType.INVALID_DATA: "데이터 형식이 올바르지 않습니다.",
             ErrorType.UNEXPECTED_ERROR: "예상치 못한 오류가 발생했습니다.",
         }

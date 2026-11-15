@@ -1,11 +1,13 @@
 import json
-from model import Quiz, BestScore
+from common.constants.output_message import OutputMessage
+from model import Quiz, BestScore, GameState
 from common.exceptions.repository_exceptions import (
     QuizFileNotFoundError,
     QuizFileCorruptedError,
     QuizFileIOError,
 )
 from pathlib import Path
+from copy import deepcopy
 
 
 class QuizRepository:
@@ -52,16 +54,38 @@ class QuizRepository:
             file_path = Path(__file__).parent.parent / "state.json"
 
         self.file_path = file_path
-        data = self._load_data()
 
-        self._quizzes = list(map(lambda x: Quiz.from_dict(x), data.get("quizzes", [])))
+    def load_game_state(self) -> bool:
 
-        if len(self._quizzes) == 0:
-            self._quizzes = self.DEFAULT_QUIZZES.copy()
+        with open(self.file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
 
-        self._best_score = BestScore.from_dict(
-            data.get("best_score", self.DEFAULT_BEST_SCORE)
+        self.game_state = GameState(
+            quizzes=[Quiz.from_dict(q) for q in data.get("quizzes", list())],
+            best_score=BestScore.from_dict(
+                data.get("best_score", {"score": 0, "correct": 0, "total": 0})
+            ),
         )
+
+        return True
+
+    def get_default_game_state(self):
+        """기본값으로 game_state 생성"""
+        self.game_state = GameState(
+            quizzes=deepcopy(self.DEFAULT_QUIZZES),
+            best_score=BestScore(0, 0, 0),
+        )
+
+        return (
+            True,
+            f"기본 데이터로 초기화했습니다. 퀴즈 {len(self.game_state.quizzes)}개",
+        )
+
+    def save_game_state(self):
+        """현재 game_state를 state.json에 저장"""
+        with open(self.file_path, "w", encoding="utf-8") as f:
+            json.dump(self.game_state.to_dict(), f, ensure_ascii=False, indent=4)
+        return (True, "게임 데이터가 저장되었습니다.")
 
     def _load_data(self) -> dict:
         """파일에서 JSON 데이터 로드"""

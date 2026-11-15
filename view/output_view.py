@@ -1,3 +1,4 @@
+from common.constants.output_message import OutputMessage
 from common.enums.error_type import ErrorType
 from common.constants.menu_format import MenuFormat
 from model import Quiz, BestScore
@@ -26,10 +27,12 @@ class OutputView:
     HINT = "💡 힌트: {hint}"
     HINT_ALREADY_VIEWED = "이미 힌트를 봤습니다"
 
-    def display_menu(self, menus: list[str]) -> None:
+    def display_header(self) -> None:
         print(MenuFormat.DIVIDER_EQUAL)
         print(f"{MenuFormat.PADDING}{self.TITLE}")
         print(MenuFormat.DIVIDER_EQUAL)
+
+    def display_menu(self, menus: list[str]) -> None:
         for i, menu in enumerate(menus, start=1):
             print(f"{i}. {menu}")
         print(MenuFormat.DIVIDER_EQUAL)
@@ -144,7 +147,7 @@ class OutputView:
         """이미 힌트를 봤음을 표시"""
         print(self.HINT_ALREADY_VIEWED)
 
-    def display_error(self, error_type: ErrorType, detail: str = ""):
+    def display_error(self, error_type: ErrorType, detail: str = "") -> None:
         """에러 메시지 출력"""
         message = error_type.get_message()
 
@@ -152,3 +155,11 @@ class OutputView:
 
         if detail:
             print(f"   상세: {detail}")
+
+    def display_data_loaded(self, quiz_count, best_score) -> None:
+        print(
+            OutputMessage.DATA_LOAD_MESSAGE.format(
+                quiz_count=quiz_count, best_score=best_score
+            )
+        )
+        print(MenuFormat.DIVIDER_EQUAL)

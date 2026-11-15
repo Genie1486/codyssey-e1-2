@@ -19,10 +19,21 @@ class QuizService:
     def __init__(self, repository: QuizRepository) -> None:
         self.repository = repository
         # 속성으로 기본 데이터 저장
-        self.default_quizzes = load_default_quizzes()
-        self.default_best_score = BestScore(0, 0, 0)
+        # self.default_quizzes = load_default_quizzes()
+        # self.default_best_score = BestScore(0, 0, 0)
+        # self._initialize_data()
 
-        self._initialize_data()
+    def load_game_state(self):
+        """Repository의 load_game_state 호출"""
+        return self.repository.load_game_state()
+
+    def save_game_state(self):
+        """Repository의 save_game_state 호출"""
+        return self.repository.save_game_state()
+
+    def initialize_with_default_state(self):
+        """Repository의 get_default_game_state 호출"""
+        return self.repository.get_default_game_state()
 
     def _initialize_data(self) -> None:
         """앱 시작 시 한 번만 실행"""
