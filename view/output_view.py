@@ -1,6 +1,7 @@
 from common.constants.output_message import OutputMessage
 from common.enums.error_type import ResultType
 from common.constants.menu_format import MenuFormat
+from common.enums.menu import Menu
 from model import Quiz, BestScore
 
 
@@ -8,7 +9,8 @@ class OutputView:
     TITLE = "🎯 나만의 퀴즈 게임 🎯"
     QUIZ_LIST = "📋 등록된 퀴즈 목록 (총 {}개)"
     ADD_QUIZ = "📌 새로운 퀴즈를 추가합니다."
-    ADD_QUIZ_COMPLETE_MESSAGE = "✅ 퀴즈가 추가되었습니다!"
+    ADD_QUIZ_COMPLETE = "✅ 퀴즈가 추가되었습니다!"
+    ADD_QUIZ_FAILED = "⚠️  퀴즈 추가 실패하였습니다."
     DELETE_QUIZ = "📋 퀴즈 삭제"
     DELETE_QUIZ_COMPLETE = "\n✅ 퀴즈가 삭제되었습니다!"
     DELETE_QUIZ_FAILED = "❌ 퀴즈 삭제에 실패했습니다."
@@ -28,16 +30,35 @@ class OutputView:
     HINT_NOTICE = "💡 이 문제는 힌트가 있습니다."
     HINT = "💡 힌트: {hint}"
     HINT_ALREADY_VIEWED = "이미 힌트를 봤습니다"
+    DATA_SAVE_FAILED = "데이터 저장 실패"
+    DATA_LOAD_FAILED = "데이터 로드 실패"
 
-    def display_header(self) -> None:
+    def _display_header(self) -> None:
         print(MenuFormat.NEWLINE)
         print(MenuFormat.DIVIDER_EQUAL)
         print(f"{MenuFormat.PADDING}{self.TITLE}")
         print(MenuFormat.DIVIDER_EQUAL)
 
-    def display_menu(self, menus: list[str]) -> None:
+    def display_menu(
+        self,
+        quiz_count: int,
+        best_scoer: float,
+        is_first_loading: bool,
+        has_existing_data: bool,
+    ) -> None:
+        self._display_header()
+
+        if is_first_loading and has_existing_data:
+            self._display_saved_data_loaded(quiz_count, best_scoer)
+
+        if is_first_loading and not has_existing_data:
+            self._display_basic_data_loaded(quiz_count, best_scoer)
+
+        menus = [menu.display_name for menu in Menu]
+
         for i, menu in enumerate(menus, start=1):
             print(f"{i}. {menu}")
+
         print(MenuFormat.DIVIDER_EQUAL)
 
     def display_exit(self) -> None:
@@ -56,9 +77,7 @@ class OutputView:
         print(MenuFormat.NEWLINE)
 
         if len(quizzes) == 0:
-            print(MenuFormat.DIVIDER_DASH)
-            print(self.NO_QUIZ)
-            print(MenuFormat.DIVIDER_DASH)
+            self._display_no_quiz()
             return
 
         print(MenuFormat.DIVIDER_DASH)
@@ -86,9 +105,17 @@ class OutputView:
             )
         print(MenuFormat.NEWLINE)
 
-    def display_add_quiz_success_result(self) -> None:
+    def display_add_quiz_result(self, success: bool) -> None:
         print(MenuFormat.NEWLINE)
-        print(self.ADD_QUIZ_COMPLETE_MESSAGE)
+        if success:
+            print(self.ADD_QUIZ_COMPLETE)
+        else:
+            print(self.ADD_QUIZ_FAILED)
+        print(MenuFormat.NEWLINE)
+
+    def _display_add_quiz_success_result(self) -> None:
+        print(MenuFormat.NEWLINE)
+        print(self.ADD_QUIZ_COMPLETE)
         print(MenuFormat.NEWLINE)
 
     def display_add_quiz_start(self) -> None:
@@ -104,6 +131,9 @@ class OutputView:
 
         print(MenuFormat.DIVIDER_EQUAL)
 
+        if total_quiz_count == 0:
+            self._display_no_quiz()
+
     def display_quiz(self, quiz: Quiz, quiz_number: int) -> None:
         print(MenuFormat.NEWLINE)
         print(self.QUESTION_NUMBER.format(number=quiz_number))
@@ -117,20 +147,18 @@ class OutputView:
         if quiz.has_hint():
             print(self.HINT_NOTICE)
 
-    def display_no_quiz(self) -> None:
+    def _display_no_quiz(self) -> None:
         print(MenuFormat.DIVIDER_DASH)
         print(self.NO_QUIZ)
         print(MenuFormat.DIVIDER_DASH)
 
-    def display_correct(self) -> None:
-        print(self.CORRECT)
+    def display_single_quiz_result(self, is_correct: bool, answer: str):
         print(MenuFormat.NEWLINE)
-        print(MenuFormat.NEWLINE)
-        print(MenuFormat.DIVIDER_DASH)
-
-    def display_incorrect(self, correct_answer: int) -> None:
-        print(self.INCORRECT)
-        print(self.CORRECT_ANSWER.format(answer=correct_answer))
+        if is_correct:
+            print(self.CORRECT)
+        else:
+            print(self.INCORRECT)
+            print(self.CORRECT_ANSWER.format(answer=answer))
         print(MenuFormat.NEWLINE)
         print(MenuFormat.NEWLINE)
         print(MenuFormat.DIVIDER_DASH)
@@ -139,17 +167,8 @@ class OutputView:
 
         print(MenuFormat.DIVIDER_EQUAL)
 
-        print(
-            self.RESULT_SCORE_HEADER.format(
-                total=user_score["total"], correct=user_score["correct"]
-            )
-        )
-        print(
-            self.RESULT_SCORE_BODY.format(
-                hint_view_cnt=user_score["hint_view_cnt"],
-                score=user_score["score"],
-            )
-        )
+        print(self.RESULT_SCORE_HEADER.format(**user_score))
+        print(self.RESULT_SCORE_BODY.format(**user_score))
 
         if is_new_record:
             print(self.NEW_RECORD)
@@ -157,25 +176,25 @@ class OutputView:
         print(MenuFormat.NEWLINE)
         print(MenuFormat.NEWLINE)
 
-    def display_hint(self, hint: str) -> None:
+    def display_hint_result(self, hint: str, is_viewed: bool) -> None:
         """힌트 표시"""
         print(MenuFormat.NEWLINE)
-        print(self.HINT.format(hint=hint))
+        if is_viewed:
+            print(self.HINT_ALREADY_VIEWED)
+            return
 
-    def display_hint_aleady_viewed(self) -> None:
-        """이미 힌트를 봤음을 표시"""
-        print(self.HINT_ALREADY_VIEWED)
+        print(self.HINT.format(hint=hint))
 
     def display_error(self, error_type: ResultType, detail: str = "") -> None:
         """에러 메시지 출력"""
         message = error_type.get_message()
 
-        print(f"\n\n{message}")
+        print(f"\n{message}")
 
         if detail:
             print(f"   상세: {detail}")
 
-    def display_saved_data_loaded(self, quiz_count, best_score) -> None:
+    def _display_saved_data_loaded(self, quiz_count, best_score) -> None:
         print(
             OutputMessage.SAVED_DATA_LOAD_MESSAGE.format(
                 quiz_count=quiz_count, best_score=best_score
@@ -183,10 +202,34 @@ class OutputView:
         )
         print(MenuFormat.DIVIDER_EQUAL)
 
-    def display_basic_data_loaded(self, quiz_count, best_score) -> None:
+    def _display_basic_data_loaded(self, quiz_count, best_score) -> None:
         print(
             OutputMessage.DEFAULT_DATA_LOAD_MESSAGE.format(
                 quiz_count=quiz_count, best_score=best_score
             )
         )
         print(MenuFormat.DIVIDER_EQUAL)
+
+    def display_save_result(self, is_success: bool, result: ResultType) -> None:
+        # 실패는 IO에러 일 때만 발생할듯
+        print(MenuFormat.NEWLINE)
+        if not is_success:
+            print(self.DATA_SAVE_FAILED)
+
+        print(result.get_message())
+
+    def display_init_result(self, is_success: bool, result: ResultType) -> None:
+        if not is_success:
+            print(self.DATA_LOAD_FAILED)
+
+        print(result.get_message())
+
+    def display_delete_confirmation(self, number: int, question: str):
+        print(MenuFormat.NEWLINE)
+        print(self.DELETE_QUIZ_FORMAT.format(**locals()))
+
+    def display_delete_result(self, result: bool):
+        if result:
+            print(self.DELETE_QUIZ_COMPLETE)
+        else:
+            print(self.DELETE_QUIZ_FAILED)

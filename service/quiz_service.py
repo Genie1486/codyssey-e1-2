@@ -24,7 +24,7 @@ class QuizService:
             if len(game_state.quizzes) == 0:
                 game_state.quizzes = self.repository.get_default_game_state().quizzes
                 self.repository.set_game_state(game_state)
-                return False, ResultType.DATA_LOAD_COMPLETE
+                return False, ResultType.NO_QUIZZES
 
             self.repository.set_game_state(game_state)
 

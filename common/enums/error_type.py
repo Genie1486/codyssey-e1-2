@@ -8,6 +8,7 @@ class ResultType(Enum):
     # 파일 불러오기, 파일 저장
     DATA_LOAD_COMPLETE = "DATA_LOAD_COMPLETE"
     DATA_SAVE_COMPLETE = "DATA_SAVE_COMPLETE"
+    NO_QUIZZES = "NO_QUIZZES"
 
     # 사용자 입력 관련
     KEYBOARD_INTERRUPT = "USER_INTERRUPT"
@@ -27,6 +28,7 @@ class ResultType(Enum):
         messages = {
             ResultType.DATA_LOAD_COMPLETE: "데이터 로드 완료",
             ResultType.DATA_SAVE_COMPLETE: "데이터 저장 완료",
+            ResultType.NO_QUIZZES: "퀴즈 개수 0개",
             ResultType.KEYBOARD_INTERRUPT: "사용자가 프로그램을 중단했습니다.",
             ResultType.EOF_ERROR: "입력 스트림이 종료되었습니다.",
             ResultType.FILE_NOT_FOUND: "필요한 파일을 찾을 수 없습니다.",
