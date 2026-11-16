@@ -2,17 +2,17 @@ from common.constants.output_message import OutputMessage
 from common.enums.error_type import ResultType
 from common.constants.menu_format import MenuFormat
 from common.enums.menu import Menu
-from model import Quiz, BestScore
+from model import Quiz, BestScore, ScoreHistory
 
 
 class OutputView:
     TITLE = "🎯 나만의 퀴즈 게임 🎯"
-    QUIZ_LIST = "📋 등록된 퀴즈 목록 (총 {}개)"
+    QUIZ_LIST = "등록된 퀴즈 목록 (총 {}개)"
     ADD_QUIZ = "📌 새로운 퀴즈를 추가합니다."
     ADD_QUIZ_COMPLETE = "✅ 퀴즈가 추가되었습니다!"
     ADD_QUIZ_FAILED = "⚠️  퀴즈 추가 실패하였습니다."
     DELETE_QUIZ = "📋 퀴즈 삭제"
-    DELETE_QUIZ_COMPLETE = "\n✅ 퀴즈가 삭제되었습니다!"
+    DELETE_QUIZ_COMPLETE = "✅ 퀴즈가 삭제되었습니다!"
     DELETE_QUIZ_FAILED = "❌ 퀴즈 삭제에 실패했습니다."
     DELETE_QUIZ_FORMAT = "🗑️  [{number}] {question}"
     QUIZ_START = "📝 퀴즈를 시작합니다! (총 {total}문제)"
@@ -32,6 +32,13 @@ class OutputView:
     HINT_ALREADY_VIEWED = "이미 힌트를 봤습니다"
     DATA_SAVE_FAILED = "데이터 저장 실패"
     DATA_LOAD_FAILED = "데이터 로드 실패"
+    SCORE_HISTORY_HEADER = "📜 게임 기록 히스토리 (총 {count}회)"
+    SCORE_HISTORY_EMPTY = "아직 플레이한 게임 기록이 없습니다."
+    SCORE_HISTORY_ITEM = (
+        "[{index}] {played_at} | {total}문제 중 {correct}문제 정답 | {score:.1f}점"
+    )
+    SAVE_HISTORY_COMPLETE = "✅ 게임 기록이 저장되었습니다!"
+    SAVE_HISTORY_FAILED = "❌ 게임 기록 저장에 실패했습니다."
 
     def _display_header(self) -> None:
         print(MenuFormat.NEWLINE)
@@ -93,17 +100,28 @@ class OutputView:
     def display_best_score(self, best_score: BestScore) -> None:
         # 🏆 최고 점수: 80점 (5문제 중 4문제 정답)
         print(MenuFormat.NEWLINE)
+        print(MenuFormat.DIVIDER_EQUAL)
         if best_score is None:
             print(self.NO_BEST_SCORE)
         else:
-            print(
-                self.BEST_SCORE.format(
-                    score=best_score.score,
-                    total=best_score.total,
-                    correct=best_score.correct,
-                )
-            )
+            print(self.BEST_SCORE.format(**best_score.to_dict()))
+        print(MenuFormat.DIVIDER_EQUAL)
         print(MenuFormat.NEWLINE)
+
+    def display_score_histories(self, histories: list[ScoreHistory]) -> None:
+        print(self.SCORE_HISTORY_HEADER.format(count=len(histories)))
+
+        print(MenuFormat.DIVIDER_DASH)
+
+        if not histories:
+            print(self.SCORE_HISTORY_EMPTY)
+            print(MenuFormat.DIVIDER_DASH)
+            return
+
+        for i, history in enumerate(histories, start=1):
+            print(self.SCORE_HISTORY_ITEM.format(index=i, **history.to_dict()))
+
+        print(MenuFormat.DIVIDER_DASH)
 
     def display_add_quiz_result(self, success: bool) -> None:
         print(MenuFormat.NEWLINE)
@@ -229,7 +247,15 @@ class OutputView:
         print(self.DELETE_QUIZ_FORMAT.format(**locals()))
 
     def display_delete_result(self, result: bool):
+        print(MenuFormat.NEWLINE)
         if result:
             print(self.DELETE_QUIZ_COMPLETE)
         else:
             print(self.DELETE_QUIZ_FAILED)
+
+    def display_save_history_result(self, is_saved: bool) -> None:
+        print(MenuFormat.NEWLINE)
+        if is_saved:
+            print(self.SAVE_HISTORY_COMPLETE)
+        else:
+            print(self.SAVE_HISTORY_FAILED)

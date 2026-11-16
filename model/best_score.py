@@ -1,5 +1,5 @@
 class BestScore:
-    def __init__(self, score, correct, total):
+    def __init__(self, score: float, correct: int, total: int):
         self.score = score
         self.correct = correct
         self.total = total

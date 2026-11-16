@@ -1,4 +1,5 @@
 from model.game_state import GameState
+from model.score_history import ScoreHistory
 from repository.quiz_repository import QuizRepository
 from model import Quiz, BestScore
 from common.enums.error_type import ResultType
@@ -6,6 +7,8 @@ from common.enums.error_type import ResultType
 import random
 import json
 import time
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 
 class QuizService:
@@ -140,3 +143,21 @@ class QuizService:
 
     def remove_quiz(self, quiz: Quiz) -> bool:
         return self.repository.delete_quiz(quiz.id)  # ← 검사 생략 가능
+
+    def add_score_history(self, total: int, correct: int, score: float, **_) -> bool:
+        kst_now = datetime.now(ZoneInfo("Asia/Seoul"))
+        played_at = kst_now.strftime("%Y-%m-%d %H:%M:%S")
+
+        history = ScoreHistory(played_at, total, correct, score)
+
+        return self.repository.save_history(history)
+
+    def get_all_histories(self, ascending: bool = False) -> list[ScoreHistory]:
+        histories = self.repository.get_all_histories()
+
+        # 날짜기준 내림차순(최신이 앞에?!)
+        sorted_by_time = sorted(
+            histories, key=lambda h: h.played_at, reverse=not ascending
+        )
+
+        return sorted_by_time

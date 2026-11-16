@@ -79,6 +79,9 @@ class QuizGame:
         best_score = self.quiz_service.get_best_score()
         self.output_view.display_best_score(best_score)
 
+        histories = self.quiz_service.get_all_histories()
+        self.output_view.display_score_histories(histories)
+
     def _add_quiz(self) -> None:
         self.output_view.display_add_quiz_start()
 
@@ -111,6 +114,10 @@ class QuizGame:
         is_update_best_score = self.quiz_service.update_best_score_if_needed(user_score)
 
         self.output_view.display_quiz_result(user_score, is_update_best_score)
+
+        is_history_saved = self.quiz_service.add_score_history(**user_score)
+
+        self.output_view.display_save_history_result(is_history_saved)
 
     def _play_all_quizzes(self, quizzes):
         """모든 퀴즈 풀기"""

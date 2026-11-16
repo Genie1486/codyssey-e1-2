@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from copy import deepcopy
 
+from model.score_history import ScoreHistory
+
 
 class QuizRepository:
     DEFAULT_QUIZZES = [
@@ -74,6 +76,7 @@ class QuizRepository:
         return GameState(
             quizzes=deepcopy(self.DEFAULT_QUIZZES),
             best_score=deepcopy(self.DEFAULT_BEST_SCORE),
+            histories=list(),
         )
 
     def save_data(self) -> None:
@@ -137,3 +140,12 @@ class QuizRepository:
     def save_best_score(self, best_score: BestScore) -> None:
         """최고점수 갱신"""
         self.game_state.best_score = best_score
+
+    def get_all_histories(self) -> list[ScoreHistory]:
+        """전체 점수 기록 조회"""
+        return deepcopy(self.game_state.histories)
+
+    def save_history(self, history: ScoreHistory) -> bool:
+        """점수 기록 저장"""
+        self.game_state.histories.append(history)
+        return True
