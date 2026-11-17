@@ -7,8 +7,7 @@ from common.enums.result_type import ResultType
 import random
 import json
 import time
-from datetime import datetime
-from zoneinfo import ZoneInfo
+from datetime import datetime, timedelta, timezone
 
 
 class QuizService:
@@ -161,7 +160,9 @@ class QuizService:
         return self.repository.delete_quiz(quiz.id)  # ← 검사 생략 가능
 
     def add_score_history(self, total: int, correct: int, score: float, **_) -> bool:
-        kst_now = datetime.now(ZoneInfo("Asia/Seoul"))
+        KST = timezone(timedelta(hours=9))
+        kst_now = datetime.now(KST)
+
         played_at = kst_now.strftime("%Y-%m-%d %H:%M:%S")
 
         history = ScoreHistory(played_at, total, correct, score)
@@ -177,3 +178,4 @@ class QuizService:
         )
 
         return sorted_by_time
+
