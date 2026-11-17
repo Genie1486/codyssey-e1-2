@@ -47,23 +47,45 @@
 | ![VSCode 환경](docs/screenshots/env_vscode.png) | ![Python 및 Git 설정](docs/screenshots/env_python_git.png) |
 
 ### 설치 및 실행
+
+#### 1. 최초 설치 및 실행
 ```bash
 # 1. 저장소 복제
 git clone https://github.com/Genie1486/codyssey-e1-2.git
+
+# 2. 복제한 폴더로 이동
 cd codyssey-e1-2
 
-# 2. 프로그램 실행
+# 3. 프로그램 실행
+python main.py
+```
+![프로그램 설치 및 실행](docs/screenshots/start.png) 
+
+
+#### 2. 기존 사용자 업데이트(`git pull`)
+이미 로컬에 저장소를 복제(clone)해 둔 경우, 최신 변경 사항(백업·복구 기능 등)을 반영하기 위해 아래 명령어로 동기화 후 실행합니다.
+```bash
+# 1. 프로젝트 폴더로 이동
+cd codyssey-e1-2
+
+# 2. 코드 변경 내용 받아오기
+git pull origin main
+
+# 3. 프로그램 실행
 python main.py
 ```
 
- ![프로그램 설치 및 실행](docs/screenshots/start.png) 
+![git pull](docs/screenshots/pull.png) 
+
 
 ### 단위 테스트 실행
 ```bash
+# 1. 프로젝트 폴더로 이동
+cd codyssey-e1-2
+
+# 2. 테스트 실행
 python run_all_tests.py
 ```
-
-
 
 
 ---
