@@ -56,10 +56,15 @@ cd codyssey-e1-2
 python main.py
 ```
 
+ ![프로그램 설치 및 실행](docs/screenshots/start.png) 
+
 ### 단위 테스트 실행
 ```bash
 python run_all_tests.py
 ```
+
+
+
 
 ---
 
