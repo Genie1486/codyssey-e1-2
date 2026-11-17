@@ -2,7 +2,7 @@
 import unittest
 from unittest.mock import MagicMock, Mock, patch
 from service.quiz_service import QuizService
-from common.enums.error_type import ResultType
+from common.enums.result_type import ResultType
 
 
 class TestLoadGameState(unittest.TestCase):

@@ -1,5 +1,5 @@
 from common.constants.output_message import OutputMessage
-from common.enums.error_type import ResultType
+from common.enums.result_type import ResultType
 from common.constants.menu_format import MenuFormat
 from common.enums.menu import Menu
 from model import Quiz, BestScore, ScoreHistory

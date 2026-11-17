@@ -1,4 +1,4 @@
-from common.enums.error_type import ResultType
+from common.enums.result_type import ResultType
 from controller.quiz_game import QuizGame
 from repository.quiz_repository import QuizRepository
 from service.quiz_service import QuizService

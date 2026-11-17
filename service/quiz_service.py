@@ -2,7 +2,7 @@ from model.game_state import GameState
 from model.score_history import ScoreHistory
 from repository.quiz_repository import QuizRepository
 from model import Quiz, BestScore
-from common.enums.error_type import ResultType
+from common.enums.result_type import ResultType
 
 import random
 import json
@@ -34,9 +34,14 @@ class QuizService:
             return True, ResultType.DATA_LOAD_COMPLETE
 
         except FileNotFoundError as e:
+            if self._try_restore_from_backup():
+                return True, ResultType.RESTORED_FROM_BACKUP
+
             self._initialize_with_default_game_state()
             return False, ResultType.FILE_NOT_FOUND
         except json.JSONDecodeError as e:
+            if self._try_restore_from_backup():
+                return True, ResultType.RESTORED_FROM_BACKUP
             self._initialize_with_default_game_state()
             return False, ResultType.FILE_CORRUPTED
         except IOError as e:
@@ -44,6 +49,17 @@ class QuizService:
             return self._retry_on_io_error(
                 self.repository.load_data, ResultType.DATA_LOAD_COMPLETE
             )
+
+    def _try_restore_from_backup(self) -> bool:
+        """백업 파일(state.json.bak)로 복원 시도"""
+        try:
+            backup_data = self.repository.load_backup_data()
+            game_state = GameState.from_dict(backup_data)
+            self.repository.set_game_state(game_state)
+            self.repository.save_data()
+            return True
+        except (FileNotFoundError, json.JSONDecodeError, IOError):
+            return False
 
     def save_game_state(self) -> tuple[bool, ResultType]:
         try:

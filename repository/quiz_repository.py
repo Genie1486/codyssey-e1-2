@@ -1,10 +1,9 @@
-from model import Quiz, BestScore, GameState
+from model import Quiz, BestScore, GameState, ScoreHistory
 
 import json
 from pathlib import Path
 from copy import deepcopy
-
-from model.score_history import ScoreHistory
+import shutil
 
 
 class QuizRepository:
@@ -51,6 +50,7 @@ class QuizRepository:
             file_path = Path(__file__).parent.parent / "state.json"
 
         self.file_path = file_path
+        self.backup_path = file_path.with_suffix(".json.bak")
         self.game_state = None
 
     def load_data(self) -> dict | None:
@@ -80,9 +80,17 @@ class QuizRepository:
         )
 
     def save_data(self) -> None:
-        """self.game_state의 내용을 state.json에 저장"""
+        """기존 state.json을 백업한 뒤 self.game_state를 저장"""
+        if self.file_path.exists():
+            shutil.copy2(self.file_path, self.backup_path)  # 덮어쓰기 전 백업 생성
+
         with open(self.file_path, "w", encoding="utf-8") as f:
             json.dump(self.game_state.to_dict(), f, ensure_ascii=False, indent=4)
+
+    def load_backup_data(self) -> dict:
+        """백업 파일(state.json.bak)에서 데이터 로드"""
+        with open(self.backup_path, "r", encoding="utf-8") as f:
+            return json.load(f)
 
     # ===== Quiz 관련  =====
     def get_all_quizzes(self) -> list[Quiz]:
